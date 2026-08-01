@@ -1,5 +1,5 @@
 ---
-title: SSTO - PortSwigger
+title: SSTI - PortSwigger
 date: 2025-08-09
 tags: [portswigger, ssti]
 categories: [Thoery, PortSwigger]
