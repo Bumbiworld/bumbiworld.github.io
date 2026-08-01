@@ -1,0 +1,34 @@
+---
+title: web-hacking.kr | Chall04
+date: 2025-08-09
+tags: [ctf, webhacking.kr]
+categories: [Writeups, CTF]
+author: bumbi.203_
+---
+
+# Chall04 
+
+## Giao diện web 
+
+![image](/assets/img/CTF/webhacking.kr/chall04/image1.png)
+
+Tiếp tục chọn view source: 
+
+![image](/assets/img/CTF/webhacking.kr/chall04/image2.png)
+
+## Khai thác 
+
+Quan sát source thì thấy rằng nếu cung cấp 1 tham số POST `key` đúng với session chall4 thì solve được lab này. 
+
+Và ở đây nhìn thấy logic là biến `$hash` được gán bằng 1 dãy random 8 chữ số nối với `salt_for_you` sau đó mới gán biến `SESSION` bằng chuỗi này. 
+
+Cuối cùng thì SHA1 500 lần chuỗi đó. 
+
+Thì logic chỗ này hơi bị sai vì nó gán bằng trước khi SHA1, nên mà mình vẫn có hi vọng và nó cũng cho biết nội dụng biến `$hash` sau khi SHA1 xong nó như thế nào nên có thể viết script để khai thác. 
+
+Sau khi viết script thì mình dò tìm trong file đó dòng nào trùng khớp hay ko ?? 
+
+![image](/assets/img/CTF/webhacking.kr/chall04/image3.png)
+
+Thì kết quả là có nè. 
+

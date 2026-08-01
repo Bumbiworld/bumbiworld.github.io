@@ -1,0 +1,60 @@
+---
+title: web-hacking.kr | Chall03
+date: 2025-08-09
+tags: [ctf, webhacking.kr]
+categories: [Writeups, CTF]
+author: bumbi.203_
+---
+
+# Chall03 
+
+## Giao diện web 
+
+![image](/assets/img/CTF/webhacking.kr/chall03/image1.png)
+
+Vào đầu trang thì nó yêu cầu mình giải 1 challenge. 
+
+![image](/assets/img/CTF/webhacking.kr/chall03/image2.png)
+
+Sau khi submit thì được chuyển tới 1 trang. 
+
+![image](/assets/img/CTF/webhacking.kr/chall03/image3.png)
+
+Submit thành công thì được: 
+
+![image](/assets/img/CTF/webhacking.kr/chall03/image4.png)
+
+## Khai thác 
+
+Quay lại trang submit tên thì view source mình nhận ra như sau: 
+
+![image](/assets/img/CTF/webhacking.kr/chall03/image5.png)
+
+Nằm trong form có 1 thẻ `input` tên là `answer` chứ 1 giá trị. 
+
+![image](/assets/img/CTF/webhacking.kr/chall03/image6.png)
+
+Như vậy thì answer được gán ẩn và in ra sau đó. Nếu mình thử thay đổi xem như thế nào? 
+
+![image](/assets/img/CTF/webhacking.kr/chall03/image7.png)
+
+Kết quả nó cũng được thay đổi theo: 
+
+![image](/assets/img/CTF/webhacking.kr/chall03/image8.png)
+
+Như vậy, hoàn toàn có thể inject vào đây và nếu suy nghĩ theo hướng là nếu mình submit đúng challenge đầu web thì nó trả về dãy số đó; thì có thể đây là sqli. 
+
+Thử payload `'` xem như thế nào? 
+
+![image](/assets/img/CTF/webhacking.kr/chall03/image9.png)
+
+Nó hoàn toàn trả về: 
+
+![image](/assets/img/CTF/webhacking.kr/chall03/image10.png)
+
+Như vậy có thể viết câu query bằng nối chuỗi. 
+Truyền với payload `' OR 1=1#`
+
+![image](/assets/img/CTF/webhacking.kr/chall03/image11.png)
+
+![image](/assets/img/CTF/webhacking.kr/chall03/image12.png)
