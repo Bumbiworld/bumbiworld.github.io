@@ -50,7 +50,7 @@ INSERT INTO memes (id, title, filename) VALUES ("{id}", "{title}", "{filename}")
 
 ### 🔍 Flag 1 
 
-```
+```python=
 @app.route("/freeflag")
 def index():
     segcret = request.args.get("segcret", None)
