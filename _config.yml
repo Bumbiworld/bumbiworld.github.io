@@ -42,8 +42,8 @@ social:
     # change to your Twitter homepage
     - https://github.com/Bumbiworld # change to your GitHub homepage
     # Uncomment below to add more social links
-    # - https://www.facebook.com/username
-    # - https://www.linkedin.com/in/username
+    - https://www.facebook.com/hoang.phuc7546
+    - https://www.linkedin.com/in/v%C3%B5-ho%C3%A0ng-ph%C3%BAc-a29646334/
 
 # Site Verification Settings
 webmaster_verifications:
@@ -99,7 +99,7 @@ theme_mode: # [light | dark]
 cdn:
 
 # the avatar on sidebar, support local or CORS resources
-avatar: /assets/images/avatar/avatar.gif
+avatar: /assets/img/avatar/avatar.gif
 
 # The URL of the site-wide social preview image used in SEO `og:image` meta tag.
 # It can be overridden by a customized `page.image` in front matter.
