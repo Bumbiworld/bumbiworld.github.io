@@ -2,7 +2,7 @@
 title: VCS PassPort 2024 - WEB
 date: 2024-12-12
 tags: [ctf, web]
-categories: [CTF Writeups]
+categories: [CTF, Writeups]
 author: bumbi.203_
 ---
 
@@ -35,7 +35,7 @@ SELECT * FROM users WHERE username=("{username}")
 
 `Thêm meme vào DB ("/upload-meme")`
 
-```
+```sql
 INSERT INTO memes (id, title, filename) VALUES ("{id}", "{title}", "{filename}")
 ```
 
