@@ -640,11 +640,9 @@ Mình thấy nó đã thay đổi PID được tạo và điều đó nó đã t
 
 ![image](/assets/img/HTB/season9/Nanocorp/image23.png)
 
-Mình đã vào được trong folder **`TEMP`** 
+Mình đã vào được trong folder **`TEMP`**
 
-![image](/assets/img/HTB/season9/Nanocorp/image24.png)
-
-Như vậy thì minh cần phải brute-force cái file độc hại. 
+Như vậy thì minh cần phải brute-force cái file độc hại.
 
 Mình cần gói trong 1 script **`C`** để hiển thị flag và cả bằng chứng nữa và sau đó sẽ tạo tập lệnh **`ps1`** bằng cách sử dụng các ý tưởng từ hình trên
 
