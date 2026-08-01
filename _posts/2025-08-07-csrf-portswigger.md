@@ -82,7 +82,7 @@ Lab này có chức năng thay đổi email và mục tiêu là mình cần th�
 
 Đầu tiên mình cần login vào 1 account `wiener:peter`, sau đó thử update 1 email. 
 
-![image](/assets/images/PortSwigger/csrf/image1.png)
+![image](/assets/img/PortSwigger/csrf/image1.png)
 
 Từ đây mình thấy nó hoàn toàn thực hiện được CSRF: 
 - lí do để thực hiện tấn công là thay đổi email 
@@ -91,15 +91,15 @@ Từ đây mình thấy nó hoàn toàn thực hiện được CSRF:
 
 Sau đó, mình chọn vào `Engagement tools / Generate CSRF Poc` 
 
-![image](/assets/images/PortSwigger/csrf/image2.png)
+![image](/assets/img/PortSwigger/csrf/image2.png)
 
 Từ đây, nó đã tạo ra 1 form HTML như sau: 
 
-![image](/assets/images/PortSwigger/csrf/image3.png)
+![image](/assets/img/PortSwigger/csrf/image3.png)
 
 Cuối cùng mình copy form HTML này và đưa vào trong exploit server. 
 
-![image](/assets/images/PortSwigger/csrf/image4.png)
+![image](/assets/img/PortSwigger/csrf/image4.png)
 
 Sau đó, gửi cho victim thì sẽ solve được lab. 
 
@@ -207,17 +207,17 @@ Cookie: session=2yQIDcpia41WrATfjPqvm9tOkDvkMvLm
 
 Trong lab này thì yêu cầu thực hiện CSRF để đổi email. 
 
-![image](/assets/images/PortSwigger/csrf/image5.png)
+![image](/assets/img/PortSwigger/csrf/image5.png)
 
 Như vậy thì thấy có csrf được đính trong method POST. Nhưng mình đổi thành GET xem có gì xảy ra ko? 
 
-![image](/assets/images/PortSwigger/csrf/image6.png)
+![image](/assets/img/PortSwigger/csrf/image6.png)
 
 Thì hoàn toàn hợp lí nếu mình truyền theo GET method. 
 
 Vậy thực hiện thao tác tấn công như lab trên. 
 
-![image](/assets/images/PortSwigger/csrf/image7.png)
+![image](/assets/img/PortSwigger/csrf/image7.png)
 
 ### Xác thực csrf token phụ thuộc vào sự tồn tại của token này trong request. 
 
@@ -235,17 +235,17 @@ Cookie: session=2yQIDcpia41WrATfjPqvm9tOkDvkMvLm
 email=pwned@evil-user.net
 ```
 
-![image](/assets/images/PortSwigger/csrf/image8.png)
+![image](/assets/img/PortSwigger/csrf/image8.png)
 
 Nên mình thử xóa đi toàn bộ tham số csrf xem nó có hoạt động ko ?
 
-![image](/assets/images/PortSwigger/csrf/image9.png)
+![image](/assets/img/PortSwigger/csrf/image9.png)
 
 Thì nó hoàn toàn vẫn có thể thực hiện được. 
 
 Nên mình để có thể tấn công như sau: 
 
-![image](/assets/images/PortSwigger/csrf/image10.png)
+![image](/assets/img/PortSwigger/csrf/image10.png)
 
 ### CSRF token không được liên kết với phiên của người dùng 
 
@@ -259,21 +259,21 @@ Nên mình để có thể tấn công như sau:
 
 Đầu tiên mình đăng nhập vào account đầu tiên là `wiener:peter` và change email, dùng intercept để chặn request xong rồi copy cái csrf_token rồi drop đi. 
 
-![image](/assets/images/PortSwigger/csrf/image11.png)
+![image](/assets/img/PortSwigger/csrf/image11.png)
 
 Sau đó, mở 1 trình duyệt ẩn danh rồi login vào bằng tài khoản thứ hai. 
 
-![image](/assets/images/PortSwigger/csrf/image12.png)
+![image](/assets/img/PortSwigger/csrf/image12.png)
 
 Ở đây cũng có 1 csrf token. Vậy nếu mình change email trong tài khoản carlos mà csrf token của wiener thì sao? 
 
-![image](/assets/images/PortSwigger/csrf/image13.png)
+![image](/assets/img/PortSwigger/csrf/image13.png)
 
-![image](/assets/images/PortSwigger/csrf/image14.png)
+![image](/assets/img/PortSwigger/csrf/image14.png)
 
 Từ đây mình khai thác như sau: 
 
-![image](/assets/images/PortSwigger/csrf/image15.png)
+![image](/assets/img/PortSwigger/csrf/image15.png)
 
 ### CSRF token được ràng buộc với một cookie không thuộc phiên làm việc (non-session cookie)
 
@@ -298,19 +298,19 @@ Lab này thì mình cũng được cung cấp hai account tương tự như lab.
 
 Đầu tiên mình login vào tài khoản `wiener:peter`
 
-![image](/assets/images/PortSwigger/csrf/image16.png)
+![image](/assets/img/PortSwigger/csrf/image16.png)
 
 Từ đây thấy trong Cookie có hai trường là `session` và `csrfKey`, trong phần thân thì có `csrf`
 
 Tiếp tục login vào tài khoản thứ hai là `carlos`
 
-![image](/assets/images/PortSwigger/csrf/image17.png)
+![image](/assets/img/PortSwigger/csrf/image17.png)
 
 Nếu mình dùng csrf và csrfKey của tài khoản weiner trong tài khoản carlos thì sao? 
 
-![image](/assets/images/PortSwigger/csrf/image18.png)
+![image](/assets/img/PortSwigger/csrf/image18.png)
 
-![image](/assets/images/PortSwigger/csrf/image19.png)
+![image](/assets/img/PortSwigger/csrf/image19.png)
 
 Như vậy là do `csrfKey` nằm trong phần header, mình phải tìm cách thay đổi `csrfKey` của nạn nhân. 
 
@@ -320,11 +320,11 @@ Như vậy nếu mình set được `csrfKey` trong cookie và nhập đúng `cs
 
 Và thông qua chức năng search của thấy như sau: 
 
-![image](/assets/images/PortSwigger/csrf/image20.png)
+![image](/assets/img/PortSwigger/csrf/image20.png)
 
 Nó ko có đính kèm `csrfKey` trong response. Vậy nếu mình truyền như sau thì sao: 
 
-![image](/assets/images/PortSwigger/csrf/image21.png)
+![image](/assets/img/PortSwigger/csrf/image21.png)
 
 Như vậy mình có thể set được `csrfKey` trong Cookie. Và mình set thêm `SameSite=None` là một giá trị trong cookie, dùng để cho phép cookie được gửi đi trong các yêu cầu giữa các domain khác nhau. 
 
@@ -372,23 +372,23 @@ Kẻ tấn công có thể tự tạo token giả và đặt nó vào trình duy
 
 Lab này được cung cấp 1 tài khoản `weiner:peter`
 
-![image](/assets/images/PortSwigger/csrf/image22.png)
+![image](/assets/img/PortSwigger/csrf/image22.png)
 
 Khi update email thì ứng dụng có triển khai Double Submit token => chống CSRF 
 
-![image](/assets/images/PortSwigger/csrf/image23.png)
+![image](/assets/img/PortSwigger/csrf/image23.png)
 
 Nhưng trong chức năng search của web lại ko set `csrf` trong response. 
 
-![image](/assets/images/PortSwigger/csrf/image24.png)
+![image](/assets/img/PortSwigger/csrf/image24.png)
 
 Như vậy nếu mình chèn như sau:
 
-![image](/assets/images/PortSwigger/csrf/image25.png)
+![image](/assets/img/PortSwigger/csrf/image25.png)
 
 Như vậy thì mình hoàn toàn có thể khai thác CSRF như sau: 
 
-![image](/assets/images/PortSwigger/csrf/image26.png)
+![image](/assets/img/PortSwigger/csrf/image26.png)
 
 ## Vượt qua các hạn chế của cookie SameSite 
 
@@ -401,7 +401,7 @@ Trong ngữ cảnh này thì `"site"` được định nghĩa là **tên miền 
 
 Khi xác định 1 request có phải là **SameSite** hay ko cũng dựa vào giao thức, ví dụ: từ `http://example.com` đến `https://example.com` thì truyền duyệt coi là `cross-site`. 
 
-![image](/assets/images/PortSwigger/csrf/image27.png)
+![image](/assets/img/PortSwigger/csrf/image27.png)
 
 `eTLD` => effective top-level domain eTLD là khái niệm dùng để xử lý những tên miền nhiều phần đặc biệt như `.co.uk`, vì chúng được xem như TLD trong thực tế sử dụng.
 
@@ -523,19 +523,19 @@ Và ngoài những framework khác thì nó có tham số hỗ trợ khác.
 
 Lab này mình cũng được cấp 1 tk `wiener:peter` => sau đó mình cũng thực hiện thay đổi email. 
 
-![image](/assets/images/PortSwigger/csrf/image28.png)
+![image](/assets/img/PortSwigger/csrf/image28.png)
 
 Như vậy có thể hoàn toàn có thể tấn công CSRF vì cookie session có thể gửi cross-site với GET request, miễn là chuyển hướng top-level. 
 
-![image](/assets/images/PortSwigger/csrf/image29.png)
+![image](/assets/img/PortSwigger/csrf/image29.png)
 
 Nó hoàn toàn có thể thay đổi email. 
 
-![image](/assets/images/PortSwigger/csrf/image30.png)
+![image](/assets/img/PortSwigger/csrf/image30.png)
 
 Như vậy mình có thể khai thác như sau để gửi đến nạn nhân. 
 
-![image](/assets/images/PortSwigger/csrf/image31.png)
+![image](/assets/img/PortSwigger/csrf/image31.png)
 
 ## Bypass hạn chế SameSite bằng cách sử dụng các thành phần có sẵn trên Web (on-site gadgets) 
 
@@ -557,23 +557,23 @@ Thì nó có 1 chức năng comment là khi đó submit thì nó sẽ chuyển h
 
 Quan sát trong burp thì thấy có gọi tới 1 endpoint file JS. 
 
-![image](/assets/images/PortSwigger/csrf/image32.png)
+![image](/assets/img/PortSwigger/csrf/image32.png)
 
 Như vậy nếu mình thay đổi `postId` thành 1 `postId` ko có thật để xem phản ứng. 
 
-![image](/assets/images/PortSwigger/csrf/image33.png)
+![image](/assets/img/PortSwigger/csrf/image33.png)
 
 Nó hoàn toàn chuyển hướng về `/post/helloanhem` như sau: 
 
-![image](/assets/images/PortSwigger/csrf/image34.png)
+![image](/assets/img/PortSwigger/csrf/image34.png)
 
 Nếu thử mình inject path traversal vào tham số này thì như thế nào ?
  
-![image](/assets/images/PortSwigger/csrf/image35.png)
+![image](/assets/img/PortSwigger/csrf/image35.png)
 
 Thì nó chuyển hướng về `my-account`, vậy nếu lợi dụng để nó chuyển hướng về `change-email` thì sao. 
 
-![image](/assets/images/PortSwigger/csrf/image36.png)
+![image](/assets/img/PortSwigger/csrf/image36.png)
 
 ## Bypass SameSite thông qua các tên miên liên quan có lỗ hổng 
 
@@ -589,15 +589,15 @@ Với lab này thì có chức năng chat và mình cần chiếm quyền WebSoc
 
 Khi truy cập `/chat` => thì nhận 1 response như sau: 
 
-![image](/assets/images/PortSwigger/csrf/image37.png)
+![image](/assets/img/PortSwigger/csrf/image37.png)
 
 Khi đó thấy 101 Switching Protocol thì nó sẽ nâng cấp lên Websocket. 
 
-![image](/assets/images/PortSwigger/csrf/image38.png)
+![image](/assets/img/PortSwigger/csrf/image38.png)
 
 Từ đó nó fetch tới endpoint là `chat.js` và hình như lưu tại: `https://cms-0aa1000c03396524806d1c66009b000e.web-security-academy.net`
 
-![image](/assets/images/PortSwigger/csrf/image39.png)
+![image](/assets/img/PortSwigger/csrf/image39.png)
 
 Thì toàn bộ source nó nằm ở đây: 
 ```javascript
@@ -728,31 +728,31 @@ function htmlEncode(str) {
 
 Mình thử chat trong box chat này. Và quan sát trong tab Websocket history. 
 
-![image](/assets/images/PortSwigger/csrf/image40.png)
+![image](/assets/img/PortSwigger/csrf/image40.png)
 
 Sau đó mình gửi nó sang repeater. 
 
-![image](/assets/images/PortSwigger/csrf/image41.png)
+![image](/assets/img/PortSwigger/csrf/image41.png)
 
 Thì ra đây là dấu hiệu khi bắt đầu 1 WebSocket.
 
 Như vậy, quan sát Websocket history để bắt đầu thì sẽ có client gửi tới server `READY`.
 
-![image](/assets/images/PortSwigger/csrf/image42.png)
+![image](/assets/img/PortSwigger/csrf/image42.png)
 
 Thì chạy thì nó trả về 1 response chứa 
 
-![image](/assets/images/PortSwigger/csrf/image43.png)
+![image](/assets/img/PortSwigger/csrf/image43.png)
 
 Tuy nhiên, ở đây nó đã mở ra 1 chat mới. Bởi vì nó lấy file javascript từ domain là `cms-0aa1000c03396524806d1c66009b000e.web-security-academy.net`
 
 Khi truy cập `/` thì nó chuyển hướng thành  1 trang login. 
 
-![image](/assets/images/PortSwigger/csrf/image44.png)
+![image](/assets/img/PortSwigger/csrf/image44.png)
 
 Với các phần quan trong header là: 
 
-![image](/assets/images/PortSwigger/csrf/image45.png)
+![image](/assets/img/PortSwigger/csrf/image45.png)
 
 ```HTTP 
 Set-Cookie: session=XH1lyeJKQkrj8TLLQk58lLW7d3aI6hxM; Secure; HttpOnly; SameSite=Strict
@@ -762,17 +762,17 @@ Thì ở đây nó đã được 1 session mới cho mình và cả `SameSite=St
 
 Nên bây giờ mình thử login với payload `<h1>test</h1>`. 
 
-![image](/assets/images/PortSwigger/csrf/image46.png)
+![image](/assets/img/PortSwigger/csrf/image46.png)
 
 Nó hoàn toàn bị dính Reflected XSS! 
 
 Và sau một hồi thì mình trigger bằng GET. 
 
-![image](/assets/images/PortSwigger/csrf/image47.png)
+![image](/assets/img/PortSwigger/csrf/image47.png)
 
 Nó chuyền payload vào thì được như sau: 
 
-![image](/assets/images/PortSwigger/csrf/image48.png)
+![image](/assets/img/PortSwigger/csrf/image48.png)
 
 Tổng kết lại thì mình tìm thấy: 
 - 1 CSWSH trong live chat 
@@ -815,11 +815,11 @@ Cuối cùng, mình tạo ra 1 HTML payload dựa trên cái payload XSS ở tr�
 </script>
 ```
 
-![image](/assets/images/PortSwigger/csrf/image49.png)
+![image](/assets/img/PortSwigger/csrf/image49.png)
 
 Sau đó nó trả về nội dung chat mà chẳng may trong đó có tài khoản. 
 
-![image](/assets/images/PortSwigger/csrf/image50.png)
+![image](/assets/img/PortSwigger/csrf/image50.png)
 
 ## Bypass SameSite Lax bằng cách sử dụng cookie vừa được tạo ra
 
@@ -859,15 +859,15 @@ Bằng cách này, phương thức `window.open()` chỉ được gọi khi ngư
 
 Lab này có chức năng `change-email`, và được cung cấp 1 account là `wiener:peter`
 
-![image](/assets/images/PortSwigger/csrf/image51.png)
+![image](/assets/img/PortSwigger/csrf/image51.png)
 
 Và tài khoản này được xác minh. 
 
-![image](/assets/images/PortSwigger/csrf/image52.png)
+![image](/assets/img/PortSwigger/csrf/image52.png)
 
 Quan sát trong thì thấy có 1 request là `/oauth-callback?code=`
 
-![image](/assets/images/PortSwigger/csrf/image53.png)
+![image](/assets/img/PortSwigger/csrf/image53.png)
 
 Trong response của nó thì có Set-Cookie lại ko có thuộc tính SameSite 
 
@@ -879,7 +879,7 @@ Và quan sát trong phần request và response thì có hai trường cookie se
 
 Sau đó thì nó sẽ chuyển mình về my-account. Mình có thể thực hiện chức năng `change-email` bình thường.
 
-![image](/assets/images/PortSwigger/csrf/image54.png)
+![image](/assets/img/PortSwigger/csrf/image54.png)
 
 Quan sát trong request hay response cũng đều ko có csrf token. 
 
@@ -887,7 +887,7 @@ Do nó ko set SameSite thì trong mặc định nó sẽ được gán là Lax m
 
 Nếu vậy mình thử với payload bình thường xem có thể thay đổi được email hay ko ? 
 
-![image](/assets/images/PortSwigger/csrf/image55.png)
+![image](/assets/img/PortSwigger/csrf/image55.png)
 
 Khhi mình thực hiện payload này và view exploit thì quan sát nó trả về rất nhanh => cho nên là nó ko thể khai thác CSRF. Vì mình cần loggin lâu hơn 2 phút để nó chưa gán **SameSite=Lax**
 
@@ -895,7 +895,7 @@ Khi truy cập `/social-login`, quá trình OAuth sẽ tự động được kh�
 
 Như vậy nếu mình truyền payload như sau: 
 
-![image](/assets/images/PortSwigger/csrf/image56.png)
+![image](/assets/img/PortSwigger/csrf/image56.png)
 
 Nghĩa là lợi dụng vào trong flow OAuth sẽ tạo ra 1 session mới, mà trong lúc tạo mới thì 2 phút nó sẽ ko gán SameSite. 
 
@@ -903,7 +903,7 @@ Nó hoàn toàn thành công khi quá trình diễn ra ít hơn 2 phút và ph�
 
 Nên mình sẽ dùng gói cái payload như sau: 
 
-![image](/assets/images/PortSwigger/csrf/image57.png)
+![image](/assets/img/PortSwigger/csrf/image57.png)
 
 ## Bypass cơ chế phòng chống CSRF dựa trên header Referer 
 
@@ -925,20 +925,20 @@ Nếu ứng dụng bỏ qua xác thực khi thiếu Referer, attacker có thể 
 
 Ở lab này mình được cung cấp 1 account `wiener:peter`
 
-![image](/assets/images/PortSwigger/csrf/image58.png)
+![image](/assets/img/PortSwigger/csrf/image58.png)
 
 Thì mình cũng thử gửi payload đến server exploit như sau: 
 
-![image](/assets/images/PortSwigger/csrf/image59.png)
+![image](/assets/img/PortSwigger/csrf/image59.png)
 
 Thì mình nhận được 1 thông báo như sau: 
 
-![image](/assets/images/PortSwigger/csrf/image60.png)
+![image](/assets/img/PortSwigger/csrf/image60.png)
 
 Như vậy server dựa trên Referer để xác thực. 
 Cho nên mình thêm payload như sau: 
 
-![image](/assets/images/PortSwigger/csrf/image61.png)
+![image](/assets/img/PortSwigger/csrf/image61.png)
 
 ## Xác thực Referer có thể bị phá vỡ 
 
@@ -960,25 +960,25 @@ Do nhiều trình duyệt mặc định loại bỏ query string khỏi Referer,
 
 Lab này cũng được cung cấp 1 account `wiener:peter` 
 
-![image](/assets/images/PortSwigger/csrf/image62.png)
+![image](/assets/img/PortSwigger/csrf/image62.png)
 
 Khi thử change-email thì có trường Referer như sau: 
 
-![image](/assets/images/PortSwigger/csrf/image63.png)
+![image](/assets/img/PortSwigger/csrf/image63.png)
 
 Nếu mình thay đổi trường này thì sao? 
 
-![image](/assets/images/PortSwigger/csrf/image64.png)
+![image](/assets/img/PortSwigger/csrf/image64.png)
 
 Như vậy mình thêm 1 tham số GET thì như thế nào? 
 
-![image](/assets/images/PortSwigger/csrf/image65.png)
+![image](/assets/img/PortSwigger/csrf/image65.png)
 
 Yah nó vẫn hoạt động! 
 
 Nếu như vây thì mình có thể dùng 1 hàm trong Js được gọi là `history.pushState()` dùng để thay đổi URL trên thanh địa chỉ mà không tải lại trang và cho phép quản lý lịch sử trình duyệt một cách linh hoạt.
 
-![image](/assets/images/PortSwigger/csrf/image66.png)
+![image](/assets/img/PortSwigger/csrf/image66.png)
 
 ## Cách phòng chống CSRF 
 

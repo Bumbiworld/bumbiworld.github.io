@@ -11,7 +11,7 @@ JWT được viết tắt là Json Web Token, dùng để xác thực và cơ ch
 
 ### JWT Format 
 Được chia làm 3 phần: header, payload, và signature. Mỗi phần thì được tách ra bằng dấu `.`
-![image](/assets/images/PortSwigger/jwt/image1.png)
+![image](/assets/img/PortSwigger/jwt/image1.png)
 
 Và thường thì nó sẽ được encode base64
 
@@ -21,7 +21,7 @@ Signature hay còn gọi là chữ ký, thì thường server phát hành token 
 ### JWT & JWS & JWE 
 JWS là Jason Web Signature, JWE là Jason Web Encryption. Cả hai đều là mở rộng từ JWT. 
 
-![image](/assets/images/PortSwigger/jwt/image2.png)
+![image](/assets/img/PortSwigger/jwt/image2.png)
 
 ## Tấn công JWT 
 Tấn công thường liên quan đến việc chỉnh sửa JWT và gửi tới Server để đạt được mục đích xấu. Mục tiêu là bypass authentication và kiểm soát user khác đã xác thực. 
@@ -40,7 +40,7 @@ Attacker có thể tạo 1 token hợp lệ với các giá trị thuộc tính,
 Ưu điểm: không cần lưu trạng thái trên server, dễ mở rộng.
 Nhược điểm: Nếu server không kiểm tra chữ ký đúng cách, thì ai đó có thể sửa thoải mái và server không phát hiện. 
 
-![image](/assets/images/PortSwigger/jwt/image3.png)
+![image](/assets/img/PortSwigger/jwt/image3.png)
 Nếu mà server dùng `username` để xác định phiên và `isAdmin` để xác định vai trò của user. Như vậy thì dễ dẫn tới leo thang đặc quyền,
 
 ### Server chấp nhận bất kỳ chữ ký nào - 'ko hợp lệ hoặc kẻ tấn công tạo ra'
@@ -51,26 +51,26 @@ Các thư viện JWT thường có 2 hàm:
 #### LAB01
 Lúc đầu mình login vào 1 account có tên là `wiener`
 
-![image](/assets/images/PortSwigger/jwt/image4.png)
+![image](/assets/img/PortSwigger/jwt/image4.png)
 
 Quan sát thì sẽ có 1 JWT sinh ra. 
 
-![image](/assets/images/PortSwigger/jwt/image5.png)
+![image](/assets/img/PortSwigger/jwt/image5.png)
 
 Thì nếu server lại ko nghiêm ngặt thì mình hoàn toàn có thể sửa lại bằng `administrator`
 
-![image](/assets/images/PortSwigger/jwt/image6.png)
+![image](/assets/img/PortSwigger/jwt/image6.png)
 
 Sau đó, có thể truy cập vào `id=administrator`
 
-![image](/assets/images/PortSwigger/jwt/image7.png)
+![image](/assets/img/PortSwigger/jwt/image7.png)
 
 ### Server chấp nhận token không có signature
 Trong JWT header bao gồm tham số `alg` - algorithm.
 - Trường này chỉ ra thuật toán được dùng để ký token. 
 - Khi server nhận được token, nó sẽ đọc `alg` và dùng thuật toán tương ứng để kiểm tra chữ ký. 
 
-![image](/assets/images/PortSwigger/jwt/image8.png)
+![image](/assets/img/PortSwigger/jwt/image8.png)
 
 Server tin tưởng quá sớm vào nội dung của JWT - đặc biệt là trường `alg`.
 Attacker có thể lừa server bỏ qua việc xác minh, ví dụ bằng cách dùng `alg:none` và làm rối nội dung. 
@@ -78,15 +78,15 @@ Attacker có thể lừa server bỏ qua việc xác minh, ví dụ bằng cách
 #### LAB02
 Mình login vào 1 tài khoản, sẽ được sinh ra 1 token JWT. 
 
-![image](/assets/images/PortSwigger/jwt/image9.png)
+![image](/assets/img/PortSwigger/jwt/image9.png)
 
 Mình có thể thao tác vào tham số `alg`
 
-![image](/assets/images/PortSwigger/jwt/image10.png)
+![image](/assets/img/PortSwigger/jwt/image10.png)
 
 Sau đó, mình truy cập vào `id=administrator`
 
-![image](/assets/images/PortSwigger/jwt/image11.png)
+![image](/assets/img/PortSwigger/jwt/image11.png)
 
 ## Brute-forcing secret keys 
 Thuật toán dùng để ký token, ví dụ HS256(HMAC + SHA-256) => thì secret key là 1 chuỗi. 
@@ -96,30 +96,30 @@ Như vậy, nếu attacker đoán được secret key của HS256, có thể t�
 
 Mình dùng hashcat để bruteforce
 
-![image](/assets/images/PortSwigger/jwt/image12.png)
+![image](/assets/img/PortSwigger/jwt/image12.png)
 
 #### LAB03
 Khi login vào 1 tài khoản thì được sinh ra 1 JWT như sau: 
-![image](/assets/images/PortSwigger/jwt/image13.png)
+![image](/assets/img/PortSwigger/jwt/image13.png)
 
 Sau đó, mình đem đi cho hashcat crack
-![image](/assets/images/PortSwigger/jwt/image14.png)
+![image](/assets/img/PortSwigger/jwt/image14.png)
 
 Và tìm ra được chuỗi là `secret1`
 
 Tiếp theo, sẽ đem đi encode base64 để có thể tự ký lại cho token của mình. 
 
-![image](/assets/images/PortSwigger/jwt/image15.png)
+![image](/assets/img/PortSwigger/jwt/image15.png)
 
-![image](/assets/images/PortSwigger/jwt/image16.png)
+![image](/assets/img/PortSwigger/jwt/image16.png)
 
 Sau đó, ký lại thì mình đã có 1 token mới và hợp lệ dưới quyền administrator.
 
-![image](/assets/images/PortSwigger/jwt/image17.png)
+![image](/assets/img/PortSwigger/jwt/image17.png)
 
 Truy cập vào `id=administrator`
 
-![image](/assets/images/PortSwigger/jwt/image18.png)
+![image](/assets/img/PortSwigger/jwt/image18.png)
 
 ## Tiêm nhiễm tham số JWT header 
 Trong header của JWT thì ngoài tham số `alg` thì nó còn có: 
@@ -147,19 +147,19 @@ jwk trong header dùng để nhúng khóa công khai vào trong JWT dưới đ�
 #### LAB04
 Sau khi login vào 1 tài khoản thì mình được 1 JWT, sau đó mình tạo ra 1 khóa công khai như sau:
 
-![image](/assets/images/PortSwigger/jwt/image19.png)
+![image](/assets/img/PortSwigger/jwt/image19.png)
 
 Tiếp theo, mình nhúng khóa công khai này vào trong JWT của mình. 
 
-![image](/assets/images/PortSwigger/jwt/image20.png)
+![image](/assets/img/PortSwigger/jwt/image20.png)
 
 Cuối cùng, sau khi chỉnh lại thành `administrator`, mình cần ký lại token để có tính hợp lệ. 
 
-![image](/assets/images/PortSwigger/jwt/image21.png)
+![image](/assets/img/PortSwigger/jwt/image21.png)
 
 Truy cập vào `id=adminstrator` hoàn toàn hợp lí. 
 
-![image](/assets/images/PortSwigger/jwt/image22.png)
+![image](/assets/img/PortSwigger/jwt/image22.png)
 
 ### Tiêm nhiễm các JWT tự ký thông qua tham số jku 
 Thay vì nhúng public key vào trong tham số `jwk`, mà một vài server dùng `jku` để tham chiếu đến key. 
@@ -188,19 +188,19 @@ JWK Sets (danh sách các public key) thường được công khai tại một 
 
 Khi login vào 1 account thì được sinh ra 1 JWT và sau đó mình tạo ra 1 key pair. 
 
-![image](/assets/images/PortSwigger/jwt/image23.png)
+![image](/assets/img/PortSwigger/jwt/image23.png)
 
 Sau đó, mình lưu trữ key lên 1 server của attacker, chính là khóa công khai đã tạo trước đó.
 
-![image](/assets/images/PortSwigger/jwt/image24.png)
+![image](/assets/img/PortSwigger/jwt/image24.png)
 
 Tiếp theo, mình thêm tham số `jku` dẫn đến server của attacker và cần chỉnh lại `kid` đúng với `kid` trong key đã tạo. 
 
-![image](/assets/images/PortSwigger/jwt/image25.png)
+![image](/assets/img/PortSwigger/jwt/image25.png)
 
 Sau đó, cần ký lại để mang tính hợp lệ và truy cập vào `id=adminstrator`
 
-![image](/assets/images/PortSwigger/jwt/image26.png)
+![image](/assets/img/PortSwigger/jwt/image26.png)
 
 ### Tiêm nhiễm các JWT tự ký qua tham số kid 
 Server thường dùng nhiều khóa khác nhau để ký các loại dữ liệu khác nhau, không chỉ JWT. 
@@ -219,14 +219,14 @@ Thường thì có thể dẫn tới `/dev/null` thì nó trả về file rỗng
 #### LAB06 
 Khi login thì có 1 JWT sinh ra, mà nó dùng khóa đối xứng. Cho nên mình sẽ tạo ra 1 khóa đối xứng có chứa key là `null` nhưng sẽ phải encoded Base64 `AA==`
 
-![image](/assets/images/PortSwigger/jwt/image27.png)
+![image](/assets/img/PortSwigger/jwt/image27.png)
 
 Sau đó, mình phải ký lại token này nhưng với tham số `kid` dẫn tới `/dev/null`
-![image](/assets/images/PortSwigger/jwt/image28.png)
+![image](/assets/img/PortSwigger/jwt/image28.png)
 
 Cuối cùng, mình truy cập `id=administrator`
 
-![image](/assets/images/PortSwigger/jwt/image29.png)
+![image](/assets/img/PortSwigger/jwt/image29.png)
 
 ### Các trường khác trong header cũng có thể lợi dụng 
 1. `cty` - Content Type
@@ -271,28 +271,28 @@ verify(token, publicKey);
 #### LAB07 
 Thông thường thì server hay lưu trữ public key tại `jwks.json` hoặc `/.well-known/jwks.json`
 
-![image](/assets/images/PortSwigger/jwt/image30.png)
+![image](/assets/img/PortSwigger/jwt/image30.png)
 
 Sau đó, mình copy đoạn public key này lại. Và tạo ra 1 cặp khóa bất đối xứng khác. Với key là nội dung public đã copy. 
 
-![image](/assets/images/PortSwigger/jwt/image31.png)
+![image](/assets/img/PortSwigger/jwt/image31.png)
 
 Sau đó chọn PEM, rồi copy lại. 
 
-![image](/assets/images/PortSwigger/jwt/image32.png)
+![image](/assets/img/PortSwigger/jwt/image32.png)
 
 Tiếp theo encoded public key này thành 1 chuỗi base64. Bước tiếp theo, tạo ra 1 khóa đối xứng với key là chuỗi đã encoded base64. 
 
-![image](/assets/images/PortSwigger/jwt/image33.png)
+![image](/assets/img/PortSwigger/jwt/image33.png)
 
 Cuối cùng, thì mình chỉnh sửa thuật toán thành `HS256`, và ký lại token này với khóa đối xứng. 
 
 
-![image](/assets/images/PortSwigger/jwt/image34.png)
+![image](/assets/img/PortSwigger/jwt/image34.png)
 
 Sau cùng thì truy cập `id=administrator`
 
-![image](/assets/images/PortSwigger/jwt/image35.png)
+![image](/assets/img/PortSwigger/jwt/image35.png)
 
 ## Suy ra khóa công khai từ 1 JWT đã được cấp.
 
@@ -318,19 +318,19 @@ Sau đó, mình login 2 lần để thu thập đủ 2 token.
 
 Rồi mình dùng tool đã dựng bằng docker như sau: 
 
-![image](/assets/images/PortSwigger/jwt/image36.png)
+![image](/assets/img/PortSwigger/jwt/image36.png)
 
 Mình sẽ thử hai token đã được cung cấp này: 
 
-![image](/assets/images/PortSwigger/jwt/image37.png)
+![image](/assets/img/PortSwigger/jwt/image37.png)
 
 Thì chỉ có 1 token hoạt động là token đầu tiên. Và tool cũng đã viết ra thành 1 file có chứa public key rồi. 
 
-![image](/assets/images/PortSwigger/jwt/image38.png)
+![image](/assets/img/PortSwigger/jwt/image38.png)
 
 Mình lặp lại các bước như encoded base64 public key này, rồi tạo 1 khóa đối xứng. 
 
-![image](/assets/images/PortSwigger/jwt/image39.png)
+![image](/assets/img/PortSwigger/jwt/image39.png)
 
 ## Khắc phục 
 1. Dùng thư viện JWT mới nhất 

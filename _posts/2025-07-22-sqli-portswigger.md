@@ -8,17 +8,17 @@ author: bumbi.203_
 
 ## LAB 01 
 
-![image](/assets/images/PortSwigger/sqli/image1.png)
+![image](/assets/img/PortSwigger/sqli/image1.png)
 
 Trong lab này khi tìm kiếm thì nó sẽ thực hiện câu query trên. 
 
 Nên mình truyền payload sau: `' OR 1=1-- -`
 
-![image](/assets/images/PortSwigger/sqli/image2.png)
+![image](/assets/img/PortSwigger/sqli/image2.png)
 
 ## LAB02 
 
-![image](/assets/images/PortSwigger/sqli/image3.png)
+![image](/assets/img/PortSwigger/sqli/image3.png)
 
 Trong lab này mình phải bypass login. Và do đó, mình thử các payload như `'` hay `"` để biết xem nó có viết nối chuỗi ko. Nhưng kết quả ko trả về lỗi gì. 
 
@@ -26,7 +26,7 @@ Cho nên mình dùng các payload như sau: `administrator'-- -` hoặc `adminis
 
 Sau khi, thử payload `administrator'-- -` thì vào được account `admin`
 
-![image](/assets/images/PortSwigger/sqli/image4.png)
+![image](/assets/img/PortSwigger/sqli/image4.png)
 
 ## LAB03 
 
@@ -34,27 +34,27 @@ Trong lab này, mình phải lấy được version của database.
 
 Cho nên truyền payload `' ORDER BY <số_cột>-- -` để thực hiện tấn công theo câu lệnh `UNION`
 
-![image](/assets/images/PortSwigger/sqli/image5.png)
+![image](/assets/img/PortSwigger/sqli/image5.png)
 
 Dò 3 thì nó lỗi cho nên câu query đầu nó chỉ có 2 cột. 
 Rồi mình phải xác định cột nào có thể chứa chuỗi hay là số. 
 Nhưng mà cả hai cột đều chuỗi.
 
-![image](/assets/images/PortSwigger/sqli/image6.png)
+![image](/assets/img/PortSwigger/sqli/image6.png)
 
 Để lấy được version của database phải dựa vào cú pháp từng loại DB. Và DB đang khai thác là Oracle. 
 
-![image](/assets/images/PortSwigger/sqli/image7.png)
+![image](/assets/img/PortSwigger/sqli/image7.png)
 
 Nên truyền payload vào như sau:
 
-![image](/assets/images/PortSwigger/sqli/image8.png)
+![image](/assets/img/PortSwigger/sqli/image8.png)
 
 ## LAB04 
 
 Trong lab này tương tự như LAB03 nhưng kích hoạt trên database khác thôi. 
 
-![image](/assets/images/PortSwigger/sqli/image9.png)
+![image](/assets/img/PortSwigger/sqli/image9.png)
 
 ## LAB05 
 
@@ -62,21 +62,21 @@ Lab này phải liệt kê nội dung của database trên các DB ko phải Ora
 
 Cũng thực hiện dò cột và tấn công UNION. Sau khi dò xong thì cũng phải biết DB mình đang dùng là loại nào. Nên thử select các version.
 
-![image](/assets/images/PortSwigger/sqli/image10.png)
+![image](/assets/img/PortSwigger/sqli/image10.png)
 
 Nó dùng `PostgreSQL` thì phải khai thác theo loại DB này. 
 
 Truyền payload sau để có lấy `table_name`
 
-![image](/assets/images/PortSwigger/sqli/image11.png)
+![image](/assets/img/PortSwigger/sqli/image11.png)
 
 Tiếp theo là lấy tên cột. 
 
-![image](/assets/images/PortSwigger/sqli/image12.png)
+![image](/assets/img/PortSwigger/sqli/image12.png)
 
 Từ đây, có thể trích xuất thông tin. 
 
-![image](/assets/images/PortSwigger/sqli/image13.png)
+![image](/assets/img/PortSwigger/sqli/image13.png)
 
 ## LAB06 
 
@@ -84,47 +84,47 @@ Lab này tương tự lab5 nhưng sẽ trên DB Oracle.
 
 Tương tự các bước như lấy tên bảng, tên cột và trích xuất dữ liệu.
 
-![image](/assets/images/PortSwigger/sqli/image14.png)
+![image](/assets/img/PortSwigger/sqli/image14.png)
 
 Từ đây lấy được tên bảng. 
 
-![image](/assets/images/PortSwigger/sqli/image15.png)
+![image](/assets/img/PortSwigger/sqli/image15.png)
 
 Và lấy tên cột. 
 
-![image](/assets/images/PortSwigger/sqli/image16.png)
+![image](/assets/img/PortSwigger/sqli/image16.png)
 
 Cuối cùng là trích xuất data.
 
-![image](/assets/images/PortSwigger/sqli/image17.png)
+![image](/assets/img/PortSwigger/sqli/image17.png)
 
 ## LAB07 
 
 Lab này mình phải xác định số cột. Thì mình dò theo payload sau. 
 
-![image](/assets/images/PortSwigger/sqli/image18.png)
+![image](/assets/img/PortSwigger/sqli/image18.png)
 
 ## LAB08 
 
 Lab này xác định số cột và cột nào có thể chứa chuỗi. 
 
-![image](/assets/images/PortSwigger/sqli/image19.png)
+![image](/assets/img/PortSwigger/sqli/image19.png)
 
 ## LAB09 
 
 Lab này thì làm tương tự trích xuất data.
 
-![image](/assets/images/PortSwigger/sqli/image20.png)
+![image](/assets/img/PortSwigger/sqli/image20.png)
 
 ## LAB10 
 
 Lab này cũng trích xuất data và loại DB này là PostgreSQL. 
 
-![image](/assets/images/PortSwigger/sqli/image21.png)
+![image](/assets/img/PortSwigger/sqli/image21.png)
 
-![image](/assets/images/PortSwigger/sqli/image22.png)
+![image](/assets/img/PortSwigger/sqli/image22.png)
 
-![image](/assets/images/PortSwigger/sqli/image23.png)
+![image](/assets/img/PortSwigger/sqli/image23.png)
 
 ## LAB11 
 
@@ -132,9 +132,9 @@ Lab này liên quan đến Blind SQLi, liên quan đến trang login lúc nào c
 
 Nên mình thử inject như sau: 
 
-![image](/assets/images/PortSwigger/sqli/image24.png)
+![image](/assets/img/PortSwigger/sqli/image24.png)
 
-![image](/assets/images/PortSwigger/sqli/image25.png)
+![image](/assets/img/PortSwigger/sqli/image25.png)
 
 Và mục tiêu bài này cũng chỉ để lấy password của administrator. Cho nên mình viết script như sau. 
 
@@ -176,7 +176,7 @@ for i in range(1, length_pw + 1):
     sys.stdout.flush()
 ```
 
-![image](/assets/images/PortSwigger/sqli/image26.png)
+![image](/assets/img/PortSwigger/sqli/image26.png)
 
 ## LAB12 
 
@@ -223,13 +223,13 @@ for i in range(1, length_pw + 1):
     sys.stdout.flush()
 ``` 
 
-![image](/assets/images/PortSwigger/sqli/image27.png)
+![image](/assets/img/PortSwigger/sqli/image27.png)
 
 ## LAB13 
 
 Lab này chỉ để kích hoạt time delay, và mình phải dò payload qua các loại DB. 
 
-![image](/assets/images/PortSwigger/sqli/image28.png)
+![image](/assets/img/PortSwigger/sqli/image28.png)
 
 ## LAB14 
 
@@ -278,7 +278,7 @@ for i in range(1, length_pw + 1):
     sys.stdout.write(f"\r✅ Password là: {password}")
     sys.stdout.flush()
 ``` 
-![image](/assets/images/PortSwigger/sqli/image29.png)
+![image](/assets/img/PortSwigger/sqli/image29.png)
 
 ## LAB15 
 
@@ -286,13 +286,13 @@ Lab này là một kỹ thuật `out-of-band` của SQLi. Mục tiêu của lab 
 
 Mình tạo ra 1 domain trước. 
 
-![image](/assets/images/PortSwigger/sqli/image30.png)
+![image](/assets/img/PortSwigger/sqli/image30.png)
 
 Và sau đó, mình thử các payload để xác định loại DB mà payload đó phải được gửi tới domain đã dựng. 
 
-![image](/assets/images/PortSwigger/sqli/image31.png)
+![image](/assets/img/PortSwigger/sqli/image31.png)
 
-![image](/assets/images/PortSwigger/sqli/image32.png)
+![image](/assets/img/PortSwigger/sqli/image32.png)
 
 ## LAB16 
 
@@ -300,7 +300,7 @@ Lab này giống lab trên cũng dùng kỹ thuật out-of-band nhưng mình ph�
 
 Cũng làm tương tự nhưng thêm payload vào để trích xuất password của administrator vào phần đầu của domain để thực hiện query. 
 
-![image](/assets/images/PortSwigger/sqli/image33.png)
+![image](/assets/img/PortSwigger/sqli/image33.png)
 
 Phần đầu trước domain là password. 
 
@@ -310,32 +310,32 @@ Lab này ta phải khai thác dựa trên 1 web sử dụng XML. Và còn có c�
 
 Đầu tiên, mình thử inject vào từng trường xem như thế nào. 
 
-![image](/assets/images/PortSwigger/sqli/image34.png)
+![image](/assets/img/PortSwigger/sqli/image34.png)
 
-![image](/assets/images/PortSwigger/sqli/image35.png)
+![image](/assets/img/PortSwigger/sqli/image35.png)
 
 Cả hai trường đều bị WAF chặn. 
 
 Nhưng nếu mình dùng tool Hackvertor, để encode thì xem như thế nào. 
 
-![image](/assets/images/PortSwigger/sqli/image36.png)
+![image](/assets/img/PortSwigger/sqli/image36.png)
 
 Sau đó, mình thử truyền lại tại tab repeater. 
 
-![image](/assets/images/PortSwigger/sqli/image37.png)
+![image](/assets/img/PortSwigger/sqli/image37.png)
 
 Nó vẫn trả về kết quả bình thường như vậy nó hoạt động bình thường sau khi encode nên mình thay nó lại bằng payload như sau: `1 UNION SELECT NULL`
 
-![image](/assets/images/PortSwigger/sqli/image38.png)
+![image](/assets/img/PortSwigger/sqli/image38.png)
 
 Như vậy mình thử kiểm tra xem cột này có phải chuỗi ko. 
 
-![image](/assets/images/PortSwigger/sqli/image39.png)
+![image](/assets/img/PortSwigger/sqli/image39.png)
 
 Sau cùng, mình sẽ extract được password. 
 
-![image](/assets/images/PortSwigger/sqli/image40.png)
+![image](/assets/img/PortSwigger/sqli/image40.png)
 
 Kết quả mình khai thác được. 
 
-![image](/assets/images/PortSwigger/sqli/image41.png)
+![image](/assets/img/PortSwigger/sqli/image41.png)

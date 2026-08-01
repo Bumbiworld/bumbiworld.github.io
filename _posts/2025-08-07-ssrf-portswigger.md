@@ -10,11 +10,11 @@ author: bumbi.203_
 
 Lab này có chức năng check stock, và khi check stock thì nó sẽ gọi tới 1 API 
 
-![image](/assets/images/PortSwigger/ssrf/image1.png)
+![image](/assets/img/PortSwigger/ssrf/image1.png)
 
 Nên mình truyền payload để gọi tới internal => `http://localhost/admin` 
 
-![image](/assets/images/PortSwigger/ssrf/image2.png)
+![image](/assets/img/PortSwigger/ssrf/image2.png)
 
 ## LAB02 - SSRF cơ bản chống lại hệ thống back-end khác 
 
@@ -22,31 +22,31 @@ Lab này mình sẽ tìm xem địa chỉ của server nội bộ là bao nhiêu
 
 Khi kiểm tra chức năng check stock => thì nó sẽ gọi tới 1 API có địa chỉ như sau: 
 
-![image](/assets/images/PortSwigger/ssrf/image3.png)
+![image](/assets/img/PortSwigger/ssrf/image3.png)
 
 Từ đó, mình có thể brute-force: 
 
-![image](/assets/images/PortSwigger/ssrf/image4.png)
+![image](/assets/img/PortSwigger/ssrf/image4.png)
 
 Sau khi brute-force thì tìm ra địa chỉ IP như sau:
 
-![image](/assets/images/PortSwigger/ssrf/image5.png)
+![image](/assets/img/PortSwigger/ssrf/image5.png)
 
-![image](/assets/images/PortSwigger/ssrf/image6.png)
+![image](/assets/img/PortSwigger/ssrf/image6.png)
 
 ## LAB03 - Blind SSRF với phát hiện out-of-band 
 
 Lab này khi mà hiển thị 1 trang web thì nó dùng trường Reference để tham chiếu đến 1 URL 
 
-![image](/assets/images/PortSwigger/ssrf/image7.png)
+![image](/assets/img/PortSwigger/ssrf/image7.png)
 
 Cho nên mình sẽ thử tiêm vào đây một URL do attacker dựng sẵn sẽ như thế nào? 
 
-![image](/assets/images/PortSwigger/ssrf/image8.png)
+![image](/assets/img/PortSwigger/ssrf/image8.png)
 
 Khi đó nó trả về các DNS 
 
-![image](/assets/images/PortSwigger/ssrf/image9.png)
+![image](/assets/img/PortSwigger/ssrf/image9.png)
 
 ## LAB04 - SSRF với bộ lọc đầu vào dựa trên blacklist 
 
@@ -54,17 +54,17 @@ Lab này trong chức năng check stock cũng gọi tới 1 URL nhưng nó hoàn
 
 Nhưng mà vẫn có thể bypass được vì `127.1` cũng được hiểu là `127.0.0.1` và chữ `a` cũng có thể bị chặn theo pattern match nào đó mà mình ko bít nên sẽ thay `a` thành `A` 
 
-![image](/assets/images/PortSwigger/ssrf/image10.png)
+![image](/assets/img/PortSwigger/ssrf/image10.png)
 
 ## LAB05 - SSRF với kỹ thuật vượt qua bộ lọc thông qua lỗ hổng chuyển hướng mở (open redirection) 
 
 Sau khi truy cập thì thấy có lỗi chuyển hướng như sau: 
 
-![image](/assets/images/PortSwigger/ssrf/image11.png)
+![image](/assets/img/PortSwigger/ssrf/image11.png)
 
 Và chức năng check stock cũng gọi tới 1 URL nên mình thay đổi path rồi cho chức năng checkstock gọi tới là được. 
 
-![image](/assets/images/PortSwigger/ssrf/image12.png)
+![image](/assets/img/PortSwigger/ssrf/image12.png)
 
 ## LAB06 - Blind SSRF kết hợp khai thác lỗ hổng Shellshock 
 
@@ -74,17 +74,17 @@ Mình dùng 1 extension trong Burp Pro để có thể khai thác Blind SSRF là
 
 Khi cài extension này và đồng thời lướt web thì nó sẽ tự động scan. 
 
-![image](/assets/images/PortSwigger/ssrf/image13.png)
+![image](/assets/img/PortSwigger/ssrf/image13.png)
 
 Ngoài trường Reference thì vẫn còn trường User-Agent cũng dính SSRF. 
 
 Cho nên sau đó, mình truyền payload vào User-Agent rồi mình brute-force địa chỉ trong trường Reference. 
 
-![image](/assets/images/PortSwigger/ssrf/image14.png)
+![image](/assets/img/PortSwigger/ssrf/image14.png)
 
 Sau đó, kiểm tra DNS trả về. 
 
-![image](/assets/images/PortSwigger/ssrf/image15.png)
+![image](/assets/img/PortSwigger/ssrf/image15.png)
 
 ## LAB07 - SSRF với whitelist-based input filter 
 
@@ -93,5 +93,5 @@ Nên mình thử payload như sau: `http://localhost@stock.weliketoshop.net` tru
 
 Nhưng thêm dấu `#` để nó đóng URL lại nhưng vẫn hiểu đúng có domain cho phép trong whitelist. 
 
-![image](/assets/images/PortSwigger/ssrf/image16.png)
+![image](/assets/img/PortSwigger/ssrf/image16.png)
 

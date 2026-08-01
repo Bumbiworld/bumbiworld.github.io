@@ -96,11 +96,11 @@ Khi server xử lý XML này và phản hồi lại nội dung của `productId`
 
 Lab này sử dụng XML trong phần check stock. 
 
-![image](/assets/images/PortSwigger/xxe/image1.png)
+![image](/assets/img/PortSwigger/xxe/image1.png)
 
 Nó ko có biện pháp bảo vệ, nên mình chỉnh sửa như sau: 
 
-![image](/assets/images/PortSwigger/xxe/image2.png)
+![image](/assets/img/PortSwigger/xxe/image2.png)
 
 ### Khai thác XXE để thực hiện tấn công SSRF 
 
@@ -120,19 +120,19 @@ Ngoài đánh cắp dữ liệu nhạy cảm, tác động chính của XXE là 
 
 Lab này sử dụng XML trong phần check stock. 
 
-![image](/assets/images/PortSwigger/xxe/image3.png)
+![image](/assets/img/PortSwigger/xxe/image3.png)
 
 Để thực hiện tấn công SSRF thì truyền vào như sau: 
 
-![image](/assets/images/PortSwigger/xxe/image4.png)
+![image](/assets/img/PortSwigger/xxe/image4.png)
 
 Thì nó hiển thị `latest` cho nên mình phải thêm phía sau URL thành `http://169.254.169.254/latest`
 
-![image](/assets/images/PortSwigger/xxe/image5.png)
+![image](/assets/img/PortSwigger/xxe/image5.png)
 
 Tiếp tục, khai thác như vậy. 
 
-![image](/assets/images/PortSwigger/xxe/image6.png)
+![image](/assets/img/PortSwigger/xxe/image6.png)
 
 ### Lỗ hỗng Blind XXE 
 
@@ -155,15 +155,15 @@ Bằng cách chèn thực thể đã định nghĩa vào một trường dữ li
 
 Lab này sử dụng XML trong phần check stock. 
 
-![image](/assets/images/PortSwigger/xxe/image7.png)
+![image](/assets/img/PortSwigger/xxe/image7.png)
 
 Nhưng nó sẽ ko thể thực hiện tấn công bằng các payload bình thường, mà nó là blind XXE. 
 
-![image](/assets/images/PortSwigger/xxe/image8.png)
+![image](/assets/img/PortSwigger/xxe/image8.png)
 
 Từ đây, nó trả về các DNS. 
 
-![image](/assets/images/PortSwigger/xxe/image9.png)
+![image](/assets/img/PortSwigger/xxe/image9.png)
 
 Nhưng mà lâu lâu thì các thực thể bình thường sẽ bị chặn, trong trường hợp này thì mình dùng **tham số thực thể XML** để thay thế. 
 
@@ -188,19 +188,19 @@ Các tham số thực thể XML chỉ có thể được tham chiếu từ bên 
 
 Lab này sử dụng XML trong phần check stock. 
 
-![image](/assets/images/PortSwigger/xxe/image10.png)
+![image](/assets/img/PortSwigger/xxe/image10.png)
 
 Mình cũng thử test blind XXE bằng tham số thực thể như bình xem như thế nào ? 
 
-![image](/assets/images/PortSwigger/xxe/image11.png)
+![image](/assets/img/PortSwigger/xxe/image11.png)
 
 Thì mình bị chặn khi dùng các thực thể bên ngoài. Nên mình sẽ dùng tham số thực thể như sau: 
 
-![image](/assets/images/PortSwigger/xxe/image12.png)
+![image](/assets/img/PortSwigger/xxe/image12.png)
 
 Quan sát thì sẽ có các DNS trả về. 
 
-![image](/assets/images/PortSwigger/xxe/image13.png)
+![image](/assets/img/PortSwigger/xxe/image13.png)
 
 ### Khai thác Blind XXE để rò rỉ dữ liệu out-of-band 
 
@@ -235,25 +235,25 @@ Cuối cùng, attacker phải submit XXE payload trên mục tiêu như sau:
 
 Lab này cũng sử dụng XML trong phần check stock. 
 
-![image](/assets/images/PortSwigger/xxe/image14.png)
+![image](/assets/img/PortSwigger/xxe/image14.png)
 
 Mình sẽ thực hiện blind XXE qua out-of-band để lấy dữ liệu như sau: 
 
 - Đầu tiên, mình sẽ viết 1 file DTD độc hại trên 1 server đã dựng sẵn như sau: 
 
-![image](/assets/images/PortSwigger/xxe/image15.png)
+![image](/assets/img/PortSwigger/xxe/image15.png)
 
 Thì khi đó, file DTD sẽ được lưu như sau: 
 
-![image](/assets/images/PortSwigger/xxe/image16.png)
+![image](/assets/img/PortSwigger/xxe/image16.png)
 
 - Thứ hai, mình sẽ gọi tới link chứa file DTD trên mục tiêu như sau: 
 
-![image](/assets/images/PortSwigger/xxe/image17.png)
+![image](/assets/img/PortSwigger/xxe/image17.png)
 
 Sau đó, mình xem log trả về trên web server như sau: 
 
-![image](/assets/images/PortSwigger/xxe/image18.png)
+![image](/assets/img/PortSwigger/xxe/image18.png)
 
 ### Khai thác blind XXE để trích xuất data thông qua thông báo lỗi 
 
@@ -277,15 +277,15 @@ File DTD được giải thích như sau:
 
 Lab này cũng sử dụng XML trong check stock. 
 
-![image](/assets/images/PortSwigger/xxe/image19.png)
+![image](/assets/img/PortSwigger/xxe/image19.png)
 
 Đầu tiên, mình cũng host 1 file DTD trên server. 
 
-![image](/assets/images/PortSwigger/xxe/image20.png)
+![image](/assets/img/PortSwigger/xxe/image20.png)
 
 Tiếp theo mình cũng chèn 1 tham số thực thể để gọi tới DTD trên server attacker. 
 
-![image](/assets/images/PortSwigger/xxe/image21.png)
+![image](/assets/img/PortSwigger/xxe/image21.png)
 
 ### Khai thác Blind XXE bằng cách tái sử dụng DTD local trên hệ thống 
 
@@ -344,13 +344,13 @@ Mình có thể kiểm tra xem file này có tồn tại hay ko bằng cách g�
 
 Đầu tiên, mình cần xác định là có file DTD local như đường dẫn trên ko. 
 
-![image](/assets/images/PortSwigger/xxe/image22.png)
+![image](/assets/img/PortSwigger/xxe/image22.png)
 
 Nó ko trả về lỗi thì có nghĩa là file hoàn toàn tồn tại. 
 
 Sau đó mình tiến hành ghi đè qua thực thể đã cho biết trước. 
 
-![image](/assets/images/PortSwigger/xxe/image23.png)
+![image](/assets/img/PortSwigger/xxe/image23.png)
 
 ## Tìm bề mặt tấn công XXE
 
@@ -369,11 +369,11 @@ Nghĩa là mình ko thể kiểm soát hoàn toàn XML để mình dùng `<!DOCT
 
 Ở lab này cũng dùng XML trong phần check stock, nhưng nó ko hiển thị. Và mình ko thể kiểm soát hoàn toàn XML nên mình XInclude như sau: 
 
-![image](/assets/images/PortSwigger/xxe/image24.png)
+![image](/assets/img/PortSwigger/xxe/image24.png)
 
 Sau đó, mình truyền như sau: 
 
-![image](/assets/images/PortSwigger/xxe/image25.png)
+![image](/assets/img/PortSwigger/xxe/image25.png)
 
 ### Khai thác XXE thông qua File Upload
 
@@ -386,15 +386,15 @@ Một số server lại cho phép upload các file XML hoặc là XML subcompone
 
 Ở lab này có 1 chức năng upload hình ảnh. Nhưng hình ảnh mà có hỗ trợ XML là file SVG. 
 
-![image](/assets/images/PortSwigger/xxe/image26.png)
+![image](/assets/img/PortSwigger/xxe/image26.png)
 
 Vì vậy mình tạo 1 file SVG sẽ đó upload lên thì có nội dung như sau: 
 
-![image](/assets/images/PortSwigger/xxe/image27.png)
+![image](/assets/img/PortSwigger/xxe/image27.png)
 
 Sau khi upload xong, mình truy cập vào trong đường dẫn lưu hình ảnh. 
 
-![image](/assets/images/PortSwigger/xxe/image28.png)
+![image](/assets/img/PortSwigger/xxe/image28.png)
 
 ### Khai thác XXE thông qua chỉnh sửa content-type 
 

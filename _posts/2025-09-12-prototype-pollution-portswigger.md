@@ -74,7 +74,7 @@ Mỗi object trong JavaScript có một **prototype**, từ đó nó **kế th�
 Khi truy xuất một thuộc tính của **object**, JavaScript sẽ trước tiên kiểm tra trên chính **object** đó. Nếu **object** không có thuộc tính đó, JavaScript sẽ tìm tiếp trên **prototype** của object. 
 Với các **object** sau, điều này cho phép mình truy xuất, ví dụ như `myObject.propertyA`
 
-![image](/assets/images/PortSwigger/prototype/image1.png)
+![image](/assets/img/PortSwigger/prototype/image1.png)
 
 Tóm lại:
 - Khi mình truy cập `myObject.propertyC`, JavaScript tìm ngay trên `myObject` -> có sẵn -> trả về
@@ -82,7 +82,7 @@ Tóm lại:
 
 Mình có thể thử trong dev tools. 
 
-![image](/assets/images/PortSwigger/prototype/image2.png)
+![image](/assets/img/PortSwigger/prototype/image2.png)
 
 Mặc dù ko có định nghĩa gì, nhưng mà vẫn có 1 vài thuộc tính do kế thừa sẵn trong `Object.prototype`
 
@@ -94,7 +94,7 @@ Trong JavaScript:
 - Cứ lần ngược lên như vậy tạo thành **prototype chain**
 - Cuối cùng, tất cả các chuỗi này đều dẫn về `Object.prototype` và "cha" của `Object.prototype` thì là `null` (nghĩa là hết rồi, ko còn gì nữa)
 
-![image](/assets/images/PortSwigger/prototype/image3.png)
+![image](/assets/img/PortSwigger/prototype/image3.png)
 
 Trong JavaScript, một object có thể mượn thuộc tính/phương thức từ "cha" của nó (**prototype**), không chỉ dừng lại ở cha, mà nó còn có thể leo lên cả ông, cụ,... trong **prototype chain** để tìm.
 
@@ -777,7 +777,7 @@ options.has('safe');     // true
 
 Xác định có **prototype pollution**, thử inject vào `?__proto_[foo]=bar`. Sau đó, trong console tab trên trình duyệt thì nhập `Object.prototype`
 
-![image](/assets/images/PortSwigger/prototype/image4.png)
+![image](/assets/img/PortSwigger/prototype/image4.png)
 
 
 Sau đó, tìm trong tab source thì thấy có file `searchLogger.js` 
@@ -812,27 +812,27 @@ Quan sát trong khi định nghĩa `config` chỉ có thuộc tính `params` và
 
 Như vậy, khi mình tiêm vào 1 prototype là `transport_url` và có chứa nội dung thì nó hoàn toàn tìm trong prototype và in ra theo data mình kiểm soát.
 
-![image](/assets/images/PortSwigger/prototype/image5.png)
+![image](/assets/img/PortSwigger/prototype/image5.png)
 
-![image](/assets/images/PortSwigger/prototype/image6.png)
+![image](/assets/img/PortSwigger/prototype/image6.png)
 
 **Cách DOM invader**
 
 Mình sẽ bật DOM invader và mode attacker là Prototype pollution. Sau đó, reload lại page. 
 
-![image](/assets/images/PortSwigger/prototype/image7.png)
+![image](/assets/img/PortSwigger/prototype/image7.png)
 
 Sau đó chọn **Scan for gadgets**
 
-![image](/assets/images/PortSwigger/prototype/image8.png)
+![image](/assets/img/PortSwigger/prototype/image8.png)
 
-![image](/assets/images/PortSwigger/prototype/image9.png)
+![image](/assets/img/PortSwigger/prototype/image9.png)
 
 Cuối cùng là ấn exploit 
 
-![image](/assets/images/PortSwigger/prototype/image10.png)
+![image](/assets/img/PortSwigger/prototype/image10.png)
 
-![image](/assets/images/PortSwigger/prototype/image11.png)
+![image](/assets/img/PortSwigger/prototype/image11.png)
 
 ## LAB02 - DOM XSS via an alternative prototype pollution vector 
 
@@ -840,7 +840,7 @@ Cuối cùng là ấn exploit
 
 Đầu tiên, mình cần xác định có thêm vào **prototype** ko. 
 
-![image](/assets/images/PortSwigger/prototype/image12.png)
+![image](/assets/img/PortSwigger/prototype/image12.png)
 
 Thấy có hiển thị nên hoàn toàn có thể bị **prototype pollution**
 
@@ -886,47 +886,47 @@ Dòng `let a = manager.sequence || 1; manager.sequence = a + 1;`
 
 Sau đó, nó gọi tới hàm `eval()`. Như vậy `sink` nằm ngay tại hàm `eval` này. Xem kỹ thì trong `manager` ko hoàn toàn định nghĩa `sequence` cho nên khi mình truyền thì mình có thể kiểm soát `sequence`.
 
-![image](/assets/images/PortSwigger/prototype/image13.png)
+![image](/assets/img/PortSwigger/prototype/image13.png)
 
 Nhưng nó ko hoàn toàn đưa ra alert. Quan sát trong console thì nó báo mình bị SyntaxError 
 
-![image](/assets/images/PortSwigger/prototype/image14.png)
+![image](/assets/img/PortSwigger/prototype/image14.png)
 
 Cho nên mình sẽ tiến hành debug. 
 
-![image](/assets/images/PortSwigger/prototype/image15.png)
+![image](/assets/img/PortSwigger/prototype/image15.png)
 
 Khi này thì `manager.sequence` là `alert(origin)` Và khi tiến hành cộng thì do `manager.squence` là string cho nên nó sẽ tiến hành cộng chuỗi. 
 
-![image](/assets/images/PortSwigger/prototype/image16.png)
+![image](/assets/img/PortSwigger/prototype/image16.png)
 
 Vì vậy khi đó chạy xuống hàm `eval()` sẽ là:
 
-![image](/assets/images/PortSwigger/prototype/image17.png)
+![image](/assets/img/PortSwigger/prototype/image17.png)
 
 Hoàn toàn gây ra lỗi syntax 
 
 Cho nên payload của mình là: `?__proto__.sequence=alert(origin)-` Khi đó chạy tới `eval` thì do `alert(origin)-1` là một biểu thức hợp lệ nên nó sẽ thực thi. 
 
-![image](/assets/images/PortSwigger/prototype/image18.png)
+![image](/assets/img/PortSwigger/prototype/image18.png)
 
 Còn một payload nữa nhận ra khi nó truyền vào trong câu lệnh `manager.macro` là cộng chuỗi nên mình có thể inject `);alert(origin)}//`
 
-![image](/assets/images/PortSwigger/prototype/image19.png)
+![image](/assets/img/PortSwigger/prototype/image19.png)
 
 **Cách DOM invader**
 
 Cũng tương tự như lab trên thì mình cũng phát hiện ra như sau: 
 
-![image](/assets/images/PortSwigger/prototype/image20.png)
+![image](/assets/img/PortSwigger/prototype/image20.png)
 
 Sau đó, chọn scan target. 
 
-![image](/assets/images/PortSwigger/prototype/image21.png)
+![image](/assets/img/PortSwigger/prototype/image21.png)
 
 Scan xong thì thấy hoàn toàn dính vuln nên là chọn `exploit`, nhưng nó sẽ ko hoàn toàn chạy được vì nó cũng chỉ đưa payload cơ bản cũng sẽ lỗi syntax nên là mình phải thêm dấu `-`
 
-![image](/assets/images/PortSwigger/prototype/image22.png)
+![image](/assets/img/PortSwigger/prototype/image22.png)
 
 ## LAB03 - Client-side prototype pollution via flawed santization 
 
@@ -971,39 +971,39 @@ Nhưng cách này mình hoàn toàn có thể bypass 1 cách dễ dàng nếu m�
 - `__pro__proto__to__[foo]=bar` hoặc `__pro__proto__to__.foo=bar`
 - `constconstructorructor[protoprototypetype][foo]=bar` hoặc `constconstructorructor.protoprototypetype.foo=bar`
 
-![image](/assets/images/PortSwigger/prototype/image23.png)
+![image](/assets/img/PortSwigger/prototype/image23.png)
 
 Từ đây xác nhận là nó dính **prototype pollution**, như vậy giờ mình tìm gadget nữa là được.
 
 Quan sát, source js thì thuộc tính `transport_url` tạo ra thẻ `<script>` nhưng mà nó ko được định nghĩa trong object `config`. Nhưng vậy nếu mình tiêm vào trong **prototype** có thuộc tính `transport_url` thì hoàn toàn có thể thực thi DOM XSS.
 
-![image](/assets/images/PortSwigger/prototype/image24.png)
+![image](/assets/img/PortSwigger/prototype/image24.png)
 
-![image](/assets/images/PortSwigger/prototype/image25.png)
+![image](/assets/img/PortSwigger/prototype/image25.png)
 
 ## LAB04 - Client-side prototype pollution in third-party libraries 
 
 Mình sẽ bật **DOM invader** thì nó phát hiện ra như sau: 
 
-![image](/assets/images/PortSwigger/prototype/image26.png)
+![image](/assets/img/PortSwigger/prototype/image26.png)
 
 Sau khi scan thì nó phát hiện ra: 
 
-![image](/assets/images/PortSwigger/prototype/image27.png)
+![image](/assets/img/PortSwigger/prototype/image27.png)
 
 Thông qua sink `setTimeout()`, sau đó gọi tới `hitCallBack`
 
-![image](/assets/images/PortSwigger/prototype/image28.png)
+![image](/assets/img/PortSwigger/prototype/image28.png)
 
 Nó sẽ in ra thông báo `1` sau đó, mình thay lại để in ra `document.cookie` rồi sau đó mình gửi tới client. 
 
-![image](/assets/images/PortSwigger/prototype/image29.png)
+![image](/assets/img/PortSwigger/prototype/image29.png)
 
 ## LAB05 - Client-side prototype pollution via browser APIs
 
 Mình xác định web này có lỗ hổng dì hong 
 
-![image](/assets/images/PortSwigger/prototype/image30.png)
+![image](/assets/img/PortSwigger/prototype/image30.png)
 
 Xem xét trong source có file `searchLogger.js`
 
@@ -1034,7 +1034,7 @@ window.addEventListener("load", searchLogger);
 
 Quan sát thì thấy có dùng `Object.defineProperty()` nhưng nó ko hoàn truyền value vào trong. Nên nếu mình truyền `__proto__[value]=bar`
 
-![image](/assets/images/PortSwigger/prototype/image31.png)
+![image](/assets/img/PortSwigger/prototype/image31.png)
 
 Nó đã tạo ra 1 thẻ `script`
 
@@ -1109,7 +1109,7 @@ var deparam = function( params, coerce ) {
 
 hàm này dùng để parse trên url lấy tham số. 
 
-![image](/assets/images/PortSwigger/prototype/image32.png)
+![image](/assets/img/PortSwigger/prototype/image32.png)
 
 ## LAB06 - Privilege escalation via server-side prototype pollution 
 
@@ -1117,29 +1117,29 @@ Quan sát lab này mình sẽ tìm **prototype pollution** trên phía server.
 
 Sau khi login vào thì mình được gọi 1 endpoint là `POST /my-account/change-address` thì mình thử inject vào như sau: 
 
-![image](/assets/images/PortSwigger/prototype/image33.png)
+![image](/assets/img/PortSwigger/prototype/image33.png)
 
 Thấy inject của mình được in ra trong response, và quan sát thì thấy có thuộc tính `isAdmin` thì mình được set false, nên mình sẽ sửa lại. 
 
-![image](/assets/images/PortSwigger/prototype/image34.png)
+![image](/assets/img/PortSwigger/prototype/image34.png)
 
 Như vậy, sau đó mình có thể truy cập Admin Panel. 
 
-![image](/assets/images/PortSwigger/prototype/image35.png)
+![image](/assets/img/PortSwigger/prototype/image35.png)
 
 ## LAB07 - Detecting server-side prototype pollution without polluted property reflection 
 
 Lab này bị **prototype pollution** nhưng nó sẽ ko phản chíu lại trong response. 
 
-![image](/assets/images/PortSwigger/prototype/image36.png)
+![image](/assets/img/PortSwigger/prototype/image36.png)
 
 Cho nên mình sẽ thử phá syntax xem có gây lỗi hay ko? 
 
-![image](/assets/images/PortSwigger/prototype/image37.png)
+![image](/assets/img/PortSwigger/prototype/image37.png)
 
 Mình nhìn thấy có `statusCode:555` và `status:555` mặc dù nhận Status code là `500` nên mình thử inject key `status`
 
-![image](/assets/images/PortSwigger/prototype/image38.png)
+![image](/assets/img/PortSwigger/prototype/image38.png)
 
 Như vậy mình có thể đã **prototype polluted**
 
@@ -1147,41 +1147,41 @@ Như vậy mình có thể đã **prototype polluted**
 
 Ở lab này sau khi đã thử inject `status` bằng `__proto__` nhưng ko ảnh hưởng, nhưng khi inject bằng **constructor** thì có hiệu quả:
 
-![image](/assets/images/PortSwigger/prototype/image39.png)
+![image](/assets/img/PortSwigger/prototype/image39.png)
 
 Nhưng bài này, cần phải leo quyền thành `admin`. 
 
-![image](/assets/images/PortSwigger/prototype/image40.png)
+![image](/assets/img/PortSwigger/prototype/image40.png)
 
 Chuyển sang dạng Raw 
 
-![image](/assets/images/PortSwigger/prototype/image41.png)
+![image](/assets/img/PortSwigger/prototype/image41.png)
 
 Nó có sự thay đổi -> thay đổi thành key `isAdmin`
 
-![image](/assets/images/PortSwigger/prototype/image42.png)
+![image](/assets/img/PortSwigger/prototype/image42.png)
 
 Truy cập được vào `Admin Panel`
 
-![image](/assets/images/PortSwigger/prototype/image43.png)
+![image](/assets/img/PortSwigger/prototype/image43.png)
 
 ## LAB09 - RCE via server-side prototype pollution 
 
 Ở lab mình xác định prototype pollution qua json spaces
 
-![image](/assets/images/PortSwigger/prototype/image44.png)
+![image](/assets/img/PortSwigger/prototype/image44.png)
 
 Đổi sang Raw 
 
-![image](/assets/images/PortSwigger/prototype/image45.png)
+![image](/assets/img/PortSwigger/prototype/image45.png)
 
 Quan sát trong Admin panel thì nó có `maintenance job` 
 
-![image](/assets/images/PortSwigger/prototype/image46.png)
+![image](/assets/img/PortSwigger/prototype/image46.png)
 
 Khi click và sau đó quan sát: 
 
-![image](/assets/images/PortSwigger/prototype/image47.png)
+![image](/assets/img/PortSwigger/prototype/image47.png)
 
 Nó thực hiện để `db-cleanup` và `fs-cleanup`
 
@@ -1199,15 +1199,15 @@ Dùng sink `execSync()`, để tương tác với Burp Collaborator server.
 
 Như vậy sẽ thêm vào như sau: 
 
-![image](/assets/images/PortSwigger/prototype/image48.png)
+![image](/assets/img/PortSwigger/prototype/image48.png)
 
 Sau đó, mình cho nó chạy maintaing job để có thể gọi tới child_process. 
 
-![image](/assets/images/PortSwigger/prototype/image49.png)
+![image](/assets/img/PortSwigger/prototype/image49.png)
 
 Quan sát ở tab DNS thì thấy có query trả về. 
 
-![image](/assets/images/PortSwigger/prototype/image50.png)
+![image](/assets/img/PortSwigger/prototype/image50.png)
 
 Như vậy mình truyền vào lệnh để xóa file. 
 
@@ -1215,28 +1215,28 @@ Như vậy mình truyền vào lệnh để xóa file.
 
 Mình phát hiện ra prototype pollution thông qua `json spaces`
 
-![image](/assets/images/PortSwigger/prototype/image51.png)
+![image](/assets/img/PortSwigger/prototype/image51.png)
 
-![image](/assets/images/PortSwigger/prototype/image52.png)
+![image](/assets/img/PortSwigger/prototype/image52.png)
 
 Quan sát trong tab admin thì mình vẫn nút để gợi chạy process con. 
 Cho mình truyền vào như sau: 
 
-![image](/assets/images/PortSwigger/prototype/image53.png)
+![image](/assets/img/PortSwigger/prototype/image53.png)
 
 Quan sát trong tab DNS 
 
-![image](/assets/images/PortSwigger/prototype/image54.png)
+![image](/assets/img/PortSwigger/prototype/image54.png)
 
 Như vậy mình có leak data thông qua DNS 
 
-![image](/assets/images/PortSwigger/prototype/image55.png)
+![image](/assets/img/PortSwigger/prototype/image55.png)
 
-![image](/assets/images/PortSwigger/prototype/image56.png)
+![image](/assets/img/PortSwigger/prototype/image56.png)
 
 Quan sát thấy có file `secret` -> nên mình sẽ đọc
 
-![image](/assets/images/PortSwigger/prototype/image57.png)
+![image](/assets/img/PortSwigger/prototype/image57.png)
 
 Như vậy là đã leak data thành công
 
