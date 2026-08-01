@@ -26,7 +26,7 @@ description: >- # used by seo meta and the atom feed
 url: "https://bumbiworld.github.io"
 
 github:
-  username: BumBiWorld # change to your GitHub username
+  username: Bumbiworld # change to your GitHub username
 
 twitter:
   username:  # change to your Twitter username
@@ -39,8 +39,8 @@ social:
   fediverse_handle: # fill in your fediverse handle. E.g. "@username@domain.com"
   links:
     # The first element serves as the copyright owner's link
-    - https://twitter.com/username # change to your Twitter homepage
-    - https://github.com/BumBiWorld # change to your GitHub homepage
+    # change to your Twitter homepage
+    - https://github.com/Bumbiworld # change to your GitHub homepage
     # Uncomment below to add more social links
     # - https://www.facebook.com/username
     # - https://www.linkedin.com/in/username
@@ -112,7 +112,7 @@ actions:
   # Display "Edit this post" action on each post page to encourage contributions.
   edit_post:
     enabled: false # set to true to display the "Edit this post" action.
-    url: "https://bumbiworld.github.io" # repository base URL, e.g. https://github.com/cotes2020/jekyll-theme-chirpy/edit/master
+    url: "https://github.com/Bumbiworld/bumbiworld.github.io" # repository base URL, e.g. https://github.com/cotes2020/jekyll-theme-chirpy/edit/master
     # Use dynamic or static URL for the edit link.
     # If `static_url` is false, the post's path will be appended to the `url` above as the final edit link.
     # Set to true if the URL should remain unchanged, which means each post will share the same edit link.
