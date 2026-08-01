@@ -98,23 +98,23 @@ Sau khi ghi url **`hercules.htb`** vào trong **`/etc/hosts`**
 
 Đầu tiên mình cần recon về cái web này 
 
-![image](/assets/img/HTB/season9/Hercules/image%201.png)
+![image](/assets/img/HTB/season9/Hercules/image1.png)
 
 Như vậy, thấy nó chạy trên **`Microsoft-IIS/10.0`**
 
 Tiếp tục như vậy thì cho chạy **`shortscan`** thử
 
-![image](/assets/img/HTB/season9/Hercules/image%202.png)
+![image](/assets/img/HTB/season9/Hercules/image2.png)
 
 Thì sau khi đọc thì thấy có thể bị **`web.config`** và **`precomplied.config`**
 
 Thì mình truy cập qua web thì thấy có hai port là **`80`** và **`443`**
 
-![image](/assets/img/HTB/season9/Hercules/image%203.png)
+![image](/assets/img/HTB/season9/Hercules/image3.png)
 
 Sau khi mình tìm ra được phần **`Contact`**
 
-![image](/assets/img/HTB/season9/Hercules/image%204.png)
+![image](/assets/img/HTB/season9/Hercules/image4.png)
 
 Nhưng mà nó không có ảnh hưởng gì hay lỗ hổng gì vì nó chỉ là 1 form gửi đến server, ko bị **Stored XSS** hay **SSRF**,...
 
@@ -122,11 +122,11 @@ Và trước đó mình đã recon **`http`** thì ko có gì xảy ra.
 
 Cho nên mình tiếp tục recon qua **`https`**.
 
-![image](/assets/img/HTB/season9/Hercules/image%205.png)
+![image](/assets/img/HTB/season9/Hercules/image5.png)
 
 Từ đây mình thấy nó có endpoint **`login`**
 
-![image](/assets/img/HTB/season9/Hercules/image%206.png)
+![image](/assets/img/HTB/season9/Hercules/image6.png)
 
 Thấy nó ghi là **SSO - Single Sign-On** nghĩa là login 1 lần là truy cập được nhiều dịch vụ.
 
@@ -137,7 +137,7 @@ nhưng cũng không có kết quả.
 
 Cho nên mình thử fuzz username - password xem sao.
 
-![image](/assets/img/HTB/season9/Hercules/image%207.png)
+![image](/assets/img/HTB/season9/Hercules/image7.png)
 
 Thì mình thấy thì bị giới hạn login sai. Chỉ còn cách là mình tìm credentials thuiii.
 
@@ -290,13 +290,13 @@ zeke.s**
 
 Quay lại trang login thử xem các username này có thể dùng được ko
 
-![image](/assets/img/HTB/season9/Hercules/image%208.png)
+![image](/assets/img/HTB/season9/Hercules/image8.png)
 
 Thì khi mà crendentials mình đoán thì nó sẽ in ra **`Invalid login attempt`**
 
 Và nếu mình thử user scan ra trong danh sách.
 
-![image](/assets/img/HTB/season9/Hercules/image%209.png)
+![image](/assets/img/HTB/season9/Hercules/image9.png)
 
 Thì nó in ra thông báo là **`Login attempt failed`** -> thì cho thấy username thì hợp lệ.
 
@@ -307,7 +307,7 @@ Như vậy có thể thấy nó kiểm tra dựa vào username. Và có ở đâ
 
 Trong machine **ghost**, tác giả đã thực hiện **ldap-injection-password-brute-force**, cho nên mình thử thực hiện cách này xem sao.
 
-![image](/assets/img/HTB/season9/Hercules/image%2010.png)
+![image](/assets/img/HTB/season9/Hercules/image10.png)
 
 Phát hiện ra 1 thẻ **input**:
 
@@ -329,11 +329,11 @@ Nếu mình thử payload là **`username=a*`**, để xem nó hợp lệ ko n�
 
 Thử encode URL hai lần xem nó có gì khác biệt -> nó in ra **`Login attempt failed`**
 
-![image](/assets/img/HTB/season9/Hercules/image%2011.png)
+![image](/assets/img/HTB/season9/Hercules/image11.png)
 
 Như vậy có nghĩa là hợp lệ, như vậy thì có 1 username bắt đầu bằng **`a*`** thử tiếp **`aa*`** hoặc một ký tự nào đó khác **`a`**.
 
-![image](/assets/img/HTB/season9/Hercules/image%2012.png)
+![image](/assets/img/HTB/season9/Hercules/image12.png)
 
 Ở đây nó là **`Invalid login attempt`** → thì mình thử ký tự khác.
 
@@ -341,7 +341,7 @@ Tiếp tục mình đoán câu query là **`(&(username=will.s)(description=*))`
 
 Mình thử payload **`a*`** trước.
 
-![image](/assets/img/HTB/season9/Hercules/image%2013.png)
+![image](/assets/img/HTB/season9/Hercules/image13.png)
 
 Từ đây mình xác định là nó ko bắt đầu từ **`a*`** thì mình viết script tự động làm việc này với 1 danh sách username đã tìm ra.
 
@@ -721,11 +721,11 @@ Mình đã có 1 trường **`description`** của **`johnathan.j`** ⇒ **`chan
 
 Sau khi có credential này thì mình thử login vào trong smb để double check lại để đảm bảo valid credential.
 
-![image](/assets/img/HTB/season9/Hercules/image%2014.png)
+![image](/assets/img/HTB/season9/Hercules/image14.png)
 
 Thì lại hiển thị valid với **`ken.w`**. Cho mình login lại vào bằng **`ken.w`** và enum ra tất cả users.
 
-![image](/assets/img/HTB/season9/Hercules/image%2015.png)
+![image](/assets/img/HTB/season9/Hercules/image15.png)
 
 ```bash
 **SMB         dc.hercules.htb 445    dc               [*]  x64 (name:dc) (domain:hercules.htb) (signing:True) (SMBv1:False) (NTLM:False)
@@ -781,62 +781,62 @@ Từ bảng trên thì để thấy có các tài khoản **`Administrator`**, *
 
 Giờ mình thử quay lại web để login với user là **`ken.w`** vào xem sao.
 
-![image](/assets/img/HTB/season9/Hercules/image%2016.png)
+![image](/assets/img/HTB/season9/Hercules/image16.png)
 
 Mình tiếp tục khám phá trong user này.
 
 Đến với **`Mail`** đầu tiên.
 
-![image](/assets/img/HTB/season9/Hercules/image%2017.png)
+![image](/assets/img/HTB/season9/Hercules/image17.png)
 
 - Site Maintenance
     
-    ![image](/assets/img/HTB/season9/Hercules/image%2018.png)
+    ![image](/assets/img/HTB/season9/Hercules/image18.png)
     
     Mail đầu tiên này là một thông báo về việc bảo trì trang web, và để đồng bộ với domain thì mình phải login bằng credentials trên cái site này. Nếu mà mình quên password thì liên hệ với **`Natalie`** của **`support team`** để hỗ trợ.
     
 - IMPORTANT!!
     
-    ![image](/assets/img/HTB/season9/Hercules/image%2019.png)
+    ![image](/assets/img/HTB/season9/Hercules/image19.png)
     
     Mail thứ hai này nó thông báo account mình bị hack, có thể là phishing và có đường link giả mạo là **`http://hadess.htb/ChangePassword`** 
     
 - From the Boss
     
-    ![image](/assets/img/HTB/season9/Hercules/image%2020.png)
+    ![image](/assets/img/HTB/season9/Hercules/image20.png)
     
     Mail thứ ba này từ **`boss`** nói về việc download phiếu lương tại 1 đường dẫn khác. 
     
 
 Đến mục **`Download`** 
 
-![image](/assets/img/HTB/season9/Hercules/image%2021.png)
+![image](/assets/img/HTB/season9/Hercules/image21.png)
 
 Khi mình ấn vào nút download từng phần thi nó thực thi download xuống :0 
 
-![image](/assets/img/HTB/season9/Hercules/image%2022.png)
+![image](/assets/img/HTB/season9/Hercules/image22.png)
 
 Nhưng khi quan sát tại proxy thì mình thấy có request như này 
 
-![image](/assets/img/HTB/season9/Hercules/image%2023.png)
+![image](/assets/img/HTB/season9/Hercules/image23.png)
 
 Nó truyền tên file cần download qua tham số **`fileName` , như vậy ở đây có thể bị Path Traversal.** Mình sẽ note lại và tiếp tục tìm kiếm. ****
 
 Với mục **`Sercurity`**
 
-![image](/assets/img/HTB/season9/Hercules/image%2024.png)
+![image](/assets/img/HTB/season9/Hercules/image24.png)
 
 Lúc mình test thử 2 chức năng này thì nhận được thông báo là **`Contact support to update these details` ,** có thể chưa update.
 
 Đến mục **`Account Details`** 
 
-![image](/assets/img/HTB/season9/Hercules/image%2025.png)
+![image](/assets/img/HTB/season9/Hercules/image25.png)
 
 Ở đây có form cho mình thực hiện đổi thông tin tài khoản. Nếu mà lúc này mình đổi thông tin thì hoàn toàn có thể “bứt dây động rừng”, cho nên mình ko nên sẽ quay lại sau. 
 
 Mục cuối cùng là **`Forms`** 
 
-![image](/assets/img/HTB/season9/Hercules/image%2026.png)
+![image](/assets/img/HTB/season9/Hercules/image26.png)
 
 Với mục này mình chú ý có chức năng **upload file,** cũng để sau mình sẽ quay lại cái endpoint **`/Downloads`**
 
@@ -846,15 +846,15 @@ Với mục này mình chú ý có chức năng **upload file,** cũng để sau
 
 Sau khi hỏi AI về các file nào mình cần đọc thì có kha khá thông tin như sau:
 
-![image](/assets/img/HTB/season9/Hercules/image%2027.png)
+![image](/assets/img/HTB/season9/Hercules/image27.png)
 
 Như vậy file đầu tiền mình hướng tới là **`web.config`** . 
 
-![image](/assets/img/HTB/season9/Hercules/image%2028.png)
+![image](/assets/img/HTB/season9/Hercules/image28.png)
 
 Mình khi truyền 4 **`..\`** thì ko được nên sẽ bắt đầu rút ngắn lại cho đến khi nào fit. 
 
-![image](/assets/img/HTB/season9/Hercules/image%2029.png)
+![image](/assets/img/HTB/season9/Hercules/image29.png)
 
 Như vậy mình hoàn toàn đọc được file **`web.config`** 
 
@@ -965,7 +965,7 @@ Sau khi search và hỏi AI về cookie **`.ASPXAUTH`** thì trường này dùn
 
 - [[MS-TSWP]: .ASPXAUTH Cookie | Microsoft Learn](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-tswp/fd02fed4-7bab-4d3e-a7a1-639d4838d7ca)
 
-![image](/assets/img/HTB/season9/Hercules/image%2030.png)
+![image](/assets/img/HTB/season9/Hercules/image30.png)
 
 Một số thông tin của **`web.config`** thì xác định được **ASP .NET MVC 5 web application** 
 
@@ -984,7 +984,7 @@ Theo tác giả **`0xdf`** , thì có nói về [https://0xdf.gitlab.io/2022/10/
 
 → Thì được biết đây là key dùng để encrypt/decrypt forms Auth cookies và cũng validate [ViewState](https://learn.microsoft.com/en-us/previous-versions/aspnet/bb386448(v=vs.100)), token chống giả mạo. 
 
-![image](/assets/img/HTB/season9/Hercules/image%2031.png)
+![image](/assets/img/HTB/season9/Hercules/image31.png)
 
 ### Encrypt/Decrypt Cookie
 
@@ -992,7 +992,7 @@ Theo tác giả **`0xdf`** , thì có nói về [https://0xdf.gitlab.io/2022/10/
 
 Từ bài blog của **`0xdf`** thì mình tìm được tool này [**aspnetCryptTools**](https://github.com/liquidsec/aspnetCryptTools)
 
-![image](/assets/img/HTB/season9/Hercules/image%2032.png)
+![image](/assets/img/HTB/season9/Hercules/image32.png)
 
 Sau khi chạy thì hoàn toàn bị lỗi. 
 
@@ -1004,15 +1004,15 @@ Nó hoàn toàn phù hợp với **`asp.net`** , mà ko phụ thuộc vào **`sy
 
 Đầu tiên mình cần làm là tạo ra 1 folder tên là **`LagacyAuthConsole`:**
 
-![image](/assets/img/HTB/season9/Hercules/image%2033.png)
+![image](/assets/img/HTB/season9/Hercules/image33.png)
 
 Tiếp theo, mình cần thêm package với compact version mà có thể chạy trên target. 
 
-![image](/assets/img/HTB/season9/Hercules/image%2034.png)
+![image](/assets/img/HTB/season9/Hercules/image34.png)
 
 Sau đó, mình cần restore nó lại. 
 
-![image](/assets/img/HTB/season9/Hercules/image%2035.png)
+![image](/assets/img/HTB/season9/Hercules/image35.png)
 
 Và cần chỉnh sửa lại file **`Program.cs`** , này để có thể phù hợp cho việc decrypt.
 
@@ -1050,7 +1050,7 @@ class Program
 
 Sau đó,  mình chạy tool → nó decrypt được như sau:
 
-![image](/assets/img/HTB/season9/Hercules/image%2036.png)
+![image](/assets/img/HTB/season9/Hercules/image36.png)
 
 Và nếu hoàn toàn decrypt được thì cũng hoàn toàn có thể encrypt được → mình sẽ cần encrypt để leo lên user **`web_admin` →** chỉnh sửa lại file **`Program.cs`** 
 
@@ -1085,27 +1085,27 @@ class Program
 
 Nó sinh ra được 1 cookie như sau: 
 
-![image](/assets/img/HTB/season9/Hercules/image%2037.png)
+![image](/assets/img/HTB/season9/Hercules/image37.png)
 
 Copy nó và dán vào cookie. 
 
-![image](/assets/img/HTB/season9/Hercules/image%2038.png)
+![image](/assets/img/HTB/season9/Hercules/image38.png)
 
 Như vậy mình đã leo lên được **`web_admin` → tìm kiếm trên user này.** 
 
-![image](/assets/img/HTB/season9/Hercules/image%2039.png)
+![image](/assets/img/HTB/season9/Hercules/image39.png)
 
 Mục này mình có hai mail
 
 - Security Audit
     
-    ![image](/assets/img/HTB/season9/Hercules/image%2040.png)
+    ![image](/assets/img/HTB/season9/Hercules/image40.png)
     
     Chú ý đến item 4 là **`Restrict file upload to administrators only`** → mà mình đang là **`web_admin`** → hoàn toàn upload file.
     
 - Password Reset??
     
-    ![image](/assets/img/HTB/season9/Hercules/image%2041.png)
+    ![image](/assets/img/HTB/season9/Hercules/image41.png)
     
     Ở đây thì khá giống như một kỹ thuật social engineering → nên mình skip qua. 
     
@@ -1118,15 +1118,15 @@ Giờ thì mình back lại endpoint **`/Forms`** , nơi cho mình upload file.
 
 Mình sẽ thử upload 1 file hình ảnh như **`.png`** lên xem như thế nào. 
 
-![image](/assets/img/HTB/season9/Hercules/image%2042.png)
+![image](/assets/img/HTB/season9/Hercules/image42.png)
 
 Thì nó ko cho phép. Cho nên giờ mình cần fuzz xem đuôi file nào nó cho phép. 
 
-![image](/assets/img/HTB/season9/Hercules/image%2043.png)
+![image](/assets/img/HTB/season9/Hercules/image43.png)
 
 Sau khi scan thì kết quả như sau: 
 
-![image](/assets/img/HTB/season9/Hercules/image%2044.png)
+![image](/assets/img/HTB/season9/Hercules/image44.png)
 
 Chú ý là mình thấy nó cho phép upload file **`.docx`** , nhưng mà việc reverse shell bằng file **`.docx`** thì cũng khó và thường là sẽ dùng **`macro`** để thực hiện. 
 
@@ -1134,13 +1134,13 @@ Cho nên mình quay lại chỗ **`Path Traversal`**  xem có đọc được g�
 
 Giờ thì mình cần tìm hiểu cấu trúc của Razor Pages này. Xem coi nó có gì trong đấy!!
 
-![image](/assets/img/HTB/season9/Hercules/image%2045.png)
+![image](/assets/img/HTB/season9/Hercules/image45.png)
 
 - [Views in ASP.NET Core MVC | Microsoft Learn](https://learn.microsoft.com/en-us/aspnet/core/mvc/views/overview?view=aspnetcore-9.0)
 
 Như vậy nếu mình đoán được **`/Forms`**  đặt tên như thế nào thì mình hoàn lấy được source 
 
-![image](/assets/img/HTB/season9/Hercules/image%2046.png)
+![image](/assets/img/HTB/season9/Hercules/image46.png)
 
 Dựa vào tên chức năng thì mình mạnh dạng đoán tên file **`Forms.cshtml`** :)))) 
 
@@ -1288,13 +1288,13 @@ Thì theo AI ở trên thì nó nằm tại folder **`bin`** → nhưng mà đ�
 
 Sau khi tìm kiếm thì mình thu được thông tin này 
 
-![image](/assets/img/HTB/season9/Hercules/image%2047.png)
+![image](/assets/img/HTB/season9/Hercules/image47.png)
 
 Tìm kiếm về folder **`/bin`**  thì nó thông báo như sau: 
 
 - [ASP.NET Web Site Layout | Microsoft Learn](https://learn.microsoft.com/en-us/previous-versions/aspnet/ex526337(v=vs.100)#application-folders)
 
-![image](/assets/img/HTB/season9/Hercules/image%2048.png)
+![image](/assets/img/HTB/season9/Hercules/image48.png)
 
 Nó định nghĩa rằng **“Contains compiled assembiles (.dll files)”** nghĩa là tất cả đã compile rồi sẽ nằm tại **`/bin`** như vậy **`HadesWeb.dll`** cũng nằm tại đây. 
 
@@ -1326,7 +1326,7 @@ Sau khi clone về thì mình chạy như sau:
 
 Khi nó chạy thì sẽ hiển thị như này → thì nó lã lỗi chứ ko phải chức năng :D 
 
-![image](/assets/img/HTB/season9/Hercules/image%2049.png)
+![image](/assets/img/HTB/season9/Hercules/image49.png)
 
 Cho nên mình chuyển sang tool này: 
 
@@ -1351,7 +1351,7 @@ Archive:  Linux.x64.Release.zip
 └─$ ./ILSpy ~/Desktop/HadesWeb.dll**
 ```
 
-![image](/assets/img/HTB/season9/Hercules/image%2050.png)
+![image](/assets/img/HTB/season9/Hercules/image50.png)
 
 Nhìn thấy thì nó còn cho phép **`.odt`** và lưu lại tại **`C:\\inetpub\\Reports\\`** 
 
@@ -1478,15 +1478,15 @@ Như vậy là mình đã tạo ra 1 file **`bad.odt`** có chứa ip của atta
 
 Giờ thì mình tiến hành upload cái file độc hại lên. 
 
-![image](/assets/img/HTB/season9/Hercules/image%2051.png)
+![image](/assets/img/HTB/season9/Hercules/image51.png)
 
 Mình thu được 1 tài khoản như sau: 
 
-![image](/assets/img/HTB/season9/Hercules/image%2052.png)
+![image](/assets/img/HTB/season9/Hercules/image52.png)
 
 Cho nên giờ thì mình cần crack cái hash này. 
 
-![image](/assets/img/HTB/season9/Hercules/image%2053.png)
+![image](/assets/img/HTB/season9/Hercules/image53.png)
 
 Mình thu được 1 credentials mới nữa **`natalie.a:Prettyprincess123!`**
 
@@ -1494,39 +1494,39 @@ Tới đây thì mình dùng tool **`bloodhound`**
 
 ### `Bloodhound`
 
-![image](/assets/img/HTB/season9/Hercules/image%2054.png)
+![image](/assets/img/HTB/season9/Hercules/image54.png)
 
 Sau khi chạy xong thì mình thu được các file như sau. 
 
-![image](/assets/img/HTB/season9/Hercules/image%2055.png)
+![image](/assets/img/HTB/season9/Hercules/image55.png)
 
 Sau khi có được 1 đóng data này thì mình tool [**Blood Legacy v4.3.1](https://github.com/SpecterOps/BloodHound-Legacy/releases/tag/v4.3.1)** thì để tổng hợp. Lệnh chạy là **`./BloodHound --no-sandbox --disable-gpu`** 
 
 Một hồi mày mò thì mình đã mở ra được → upload những file này vào. 
 
-![image](/assets/img/HTB/season9/Hercules/image%2056.png)
+![image](/assets/img/HTB/season9/Hercules/image56.png)
 
 Bắt đầu từ user **NATALIE.A** đầu tiên. 
 
-![image](/assets/img/HTB/season9/Hercules/image%2057.png)
+![image](/assets/img/HTB/season9/Hercules/image57.png)
 
 Mình nhìn thấy **`natalie.a`** là một thành viên của **`WEB SUPPORT@HERCULES.HTB`** 
 
 Vậy giờ mình check thử cái node này. 
 
-![image](/assets/img/HTB/season9/Hercules/image%2058.png)
+![image](/assets/img/HTB/season9/Hercules/image58.png)
 
 **`WEB SUPPORT@HERCULES.HTB`** có **`GenericWrite`** 6 users → **`web_admin`** , **`ken.w`** , **`johnathan.j`** , **`harris.d`** , **`ray.n`** , và **`bob.w`**
 
 Giờ thì mình cần nhìn cái nhìn tổng quát bằng cách là nhìn **Short Path** để nhìn thấy 1 cách tổng quát nhất → để xây dựng kế hoạch attack típ.
 
-![image](/assets/img/HTB/season9/Hercules/image%2059.png)
+![image](/assets/img/HTB/season9/Hercules/image59.png)
 
 Mình thấy rõ rằng user tiềm năng mà liên kết với mục tiêu **`mark.s`** và **`stephen.m`** là thành viên của **`SECURITY HELPDESK@HERCULES.HTB`** mà có thể **`ForceChangePassword`** tới **`Auditor`** .
 
 Và **`HELPDESK ADMINISTRATORS@HERCULES.HTB`** cũng có thể **`ForceChangePasswrod`** tới **`ashley.b`** 
 
-![image](/assets/img/HTB/season9/Hercules/image%2060.png)
+![image](/assets/img/HTB/season9/Hercules/image60.png)
 
 Và có thể mục tiêu cuối cùng là **`IIS_WEBSERVER$@HERCULES.HTB`** mà có thể **`AllowedToAct`** thẳng tới **`DC.HERCULES.HTB`** mà có thể **`DCSync`** tới **`HERCULES.HTB`** 
 
@@ -1534,13 +1534,13 @@ Nhìn thấy thì có users hoặc 1 group được xác định là dấu **`?`
 
 Mình sẽ tiếp tục lấy thông tin chung chung về các nhóm. 
 
-![image](/assets/img/HTB/season9/Hercules/image%2061.png)
+![image](/assets/img/HTB/season9/Hercules/image61.png)
 
 Mình có **`SECURITY HELPDESK@HERCULES.HTB`** có **`ForceChangePassword`** tới 7 users → **`auditor`** , **`angelo.o`** , **`stephen.m`** , **`nata.h`** , **`vincent.g`** , **`elijah.m`** và **`mark.s`** 
 
 Check **`Auditor`** thì là thành viên của 1 trong 4 groups
 
-![image](/assets/img/HTB/season9/Hercules/image%2062.png)
+![image](/assets/img/HTB/season9/Hercules/image62.png)
 
 - **`Domain Users`**
 - **`Domain Empoyees`**
@@ -1549,7 +1549,7 @@ Check **`Auditor`** thì là thành viên của 1 trong 4 groups
 
 Nhóm **`Remote Management Users`** lại có hai user là **`ashley.b`** và **`auditor`** → có nghĩa là 2 hai user này có thể dùng remote trong những cái session làm việc của họ.
 
-![image](/assets/img/HTB/season9/Hercules/image%2063.png)
+![image](/assets/img/HTB/season9/Hercules/image63.png)
 
 Và trong group **`Forest Management`** và mình có thể đoán là trong này có thể có thêm 1 DC hoặc một vài source ADCS attack liên quan đến 1 vài certificate mà mình cần để giải quyết.
 
@@ -1557,17 +1557,17 @@ Và trong group **`Forest Management`** và mình có thể đoán là trong nà
 
 Giờ thì mình quay lại với user **`natalie.a`** 
 
-![image](/assets/img/HTB/season9/Hercules/image%2064.png)
+![image](/assets/img/HTB/season9/Hercules/image64.png)
 
 Có thể nói rằng **`natalie.a`** là thành viên của **`WEB SUPPORT@HERCULES.HTB`** group và group này thì có **`GenericWrite`** tới **`bob.w`** → vậy thì mình bắt đầu từ đây. 
 
 Thật ra thì mình cũng ko biết **`GenericWrite`** là gì ?? 
 
-![image](/assets/img/HTB/season9/Hercules/image%2065.png)
+![image](/assets/img/HTB/season9/Hercules/image65.png)
 
 Cho nên mình trỏ tới rồi right click với thuộc tính. 
 
-![image](/assets/img/HTB/season9/Hercules/image%2066.png)
+![image](/assets/img/HTB/season9/Hercules/image66.png)
 
 → Ở đây mình cũng tìm ra [**shadow-credentials**](https://www.thehacker.recipes/ad/movement/kerberos/shadow-credentials) thì có nhiều cách. 
 
@@ -2237,7 +2237,7 @@ Giờ thì mình di chuyển tới **`stephen.m`** tới **`Web Department`** OU
 
 - https://github.com/aniqfakhrul/powerview.py
 
-![image](/assets/img/HTB/season9/Hercules/image%2067.png)
+![image](/assets/img/HTB/season9/Hercules/image67.png)
 
 Mình sẽ dùng **`Set-DomainObjectDN`** để chỉnh sửa object của thuộc tính distinguishedName để thay đổi OU. 
 
@@ -2306,23 +2306,23 @@ Impacket v0.13.0.dev0 - Copyright Fortra, LLC and its affiliated companies
 
 Giờ mình quay lại bloodhound và nhìn thấy. 
 
-![image](/assets/img/HTB/season9/Hercules/image%2068.png)
+![image](/assets/img/HTB/season9/Hercules/image68.png)
 
 Mình có thể thấy **`stephen.m`** là thành viên của nhóm `S**ECURITY HELPDESK@HERCULES.HTB**` mà mình có thể **`ForceChangePassword`** tới **`Auditor`** 
 
 Và nó cũng được show trong **`Shortest Path`** 
 
-![image](/assets/img/HTB/season9/Hercules/image%2069.png)
+![image](/assets/img/HTB/season9/Hercules/image69.png)
 
 Bây giờ mình sẽ thay đổi password cho **`Auditor`** thông qua **`bloodyAD`** 
 
-![image](/assets/img/HTB/season9/Hercules/image%2070.png)
+![image](/assets/img/HTB/season9/Hercules/image70.png)
 
 Tiếp tục request TGT cho **`Auditor`** 
 
-![image](/assets/img/HTB/season9/Hercules/image%2071.png)
+![image](/assets/img/HTB/season9/Hercules/image71.png)
 
-![image](/assets/img/HTB/season9/Hercules/image%2072.png)
+![image](/assets/img/HTB/season9/Hercules/image72.png)
 
 Giờ thì mình biết **`Auditor`** là thành viên của **`REMOTE MANAGEMENT@HERCULES.HTB`** , vì vậy mình có thể remote tới nó thông qua **`evil-winrm`** nhưng mà kết quả từ **`nmap`** ở trên chỉ cho thấy chỉ duy nhất port **`5986`** đang mở. 
 
@@ -2526,7 +2526,7 @@ Nhìn thấy nó show Path gốc của cleanup script → **`C:\Users\ashley.b\D
 
 Giờ thì mình cần tìm bên trong **`Auditor`** , giờ mình sẽ chạy **`bloodhound`** để xem thử coi có thu được thông tin gì ko. 
 
-![image](/assets/img/HTB/season9/Hercules/image%2073.png)
+![image](/assets/img/HTB/season9/Hercules/image73.png)
 
 Mình lại tiếp tục check và import thông tin mình thu được vào BloodHound 
 
@@ -2556,25 +2556,25 @@ Mandatory Label\Medium Mandatory Level     Label            S-1-16-8192**
 
 Giờ thì mình check group này. 
 
-![image](/assets/img/HTB/season9/Hercules/image%2074.png)
+![image](/assets/img/HTB/season9/Hercules/image74.png)
 
 Thì thấy **`FOREST MANANGEMENT@HERCULES.HTB`** có **`GenericAll`** qua **`FOREST MIGRATION@HERCULES.HTB`** 
 
 → Kiểm tra **`FOREST MIGRATION@HERCULES.HTB`** 
 
-![image](/assets/img/HTB/season9/Hercules/image%2075.png)
+![image](/assets/img/HTB/season9/Hercules/image75.png)
 
 Nhìn thấy thì mình có thể **`WriteDacl`** tới **`ADMINISTRATOR@HERCULES.HTB`** mà bao gồm **`admin`** và cũn có thể **`GenericAll`** tới **`DOMAIN ADMINISTRATOR@HERCULES.HTB`** để lấy **`Aministrator`** 
 
 → Vậy mình chọn **`GenericAll`** trên **`FOREST MIGRATION@HERCULES.HTB`** OU tới **`Auditor`** 
 
-![image](/assets/img/HTB/season9/Hercules/image%2076.png)
+![image](/assets/img/HTB/season9/Hercules/image76.png)
 
 Sau đó, mình lại tiếp tục dùng **powerview.py** 
 
 → Mình sẽ enum với **`Get-ADObject`** để lấy hết tất cả object domain trong AD. 
 
-![image](/assets/img/HTB/season9/Hercules/image%2077.png)
+![image](/assets/img/HTB/season9/Hercules/image77.png)
 
 Mình bị là nó trả ra quá nhiều thông tin → mình ko biết đươc account nào có thể hoạt động được hoặc ko và nếu như vậy thì mình phải tiến hành kích hoạt. 
 
@@ -2746,54 +2746,54 @@ Mình có thể nhìn thấy rằng kết quả cũng khá giống nhau nhưng m
 
 → giờ thì mình tìm kiếm path từ **`auditor`** tới **`admin`** để nhìn thấy nếu mình có nhiều thông tin thì mình có thể exploit được. 
 
-![image](/assets/img/HTB/season9/Hercules/image%2078.png)
+![image](/assets/img/HTB/season9/Hercules/image78.png)
 
 Sự khác biệt lớn nhất, nhìn thấy `FOREST MIGRATION@HERCULES.HTB` bao gồm `fernando.r` là thành viên của `SMARTCARD OPERATORS@HERCULES.HTB` và mình có thể `ADCSESC3` tới `HERCULES.HTB` 
 
 → Cho nên mình check user `fernando.r` 
 
-![image](/assets/img/HTB/season9/Hercules/image%2079.png)
+![image](/assets/img/HTB/season9/Hercules/image79.png)
 
 Nhìn thấy là `fernando.r` thì chưa enable
 
 → nhấp double-check vào `FOREST MIGRATION@HERCULES.HTB` để xem nó bao gồm user nào nữa. 
 
-![image](/assets/img/HTB/season9/Hercules/image%2080.png)
+![image](/assets/img/HTB/season9/Hercules/image80.png)
 
 Chú ý là **`iis_administrator@hercules.htb`** có tiềm năng nên mình giữa này để khám phá sau.
 
 ⇒ Quay lại với **`fernando.r`** , mình sẽ re-enable nó dể thực hiện **`ESC3`** attack
 
-![image](/assets/img/HTB/season9/Hercules/image%2081.png)
+![image](/assets/img/HTB/season9/Hercules/image81.png)
 
-![image](/assets/img/HTB/season9/Hercules/image%2082.png)
+![image](/assets/img/HTB/season9/Hercules/image82.png)
 
 → check lại tại user **`fernando.r`** 
 
-![image](/assets/img/HTB/season9/Hercules/image%2083.png)
+![image](/assets/img/HTB/season9/Hercules/image83.png)
 
 Nó đã bật lên ⇒ True. 
 
 Từ đây mình reset lại password. 
 
-![image](/assets/img/HTB/season9/Hercules/image%2084.png)
+![image](/assets/img/HTB/season9/Hercules/image84.png)
 
 ### ESC3
 
 ---
 
-![image](/assets/img/HTB/season9/Hercules/image%2085.png)
+![image](/assets/img/HTB/season9/Hercules/image85.png)
 
 Mình có thể dùng [**Certipy**](https://github.com/ly4k/Certipy) để exploit theo các bước mà BloodHound-CE show ra cho mình. 
 
 > Tìm hiểu thêm [ESC3: Enrollment Agent Certificate Tempalte](https://github.com/ly4k/Certipy/wiki/06-%E2%80%90-Privilege-Escalation#esc3-enrollment-agent-certificate-template)
 > 
 
-![image](/assets/img/HTB/season9/Hercules/image%2086.png)
+![image](/assets/img/HTB/season9/Hercules/image86.png)
 
 Đầu tiên mình cần lấy TGT cho **`fernando.r`** 
 
-![image](/assets/img/HTB/season9/Hercules/image%2087.png)
+![image](/assets/img/HTB/season9/Hercules/image87.png)
 
 Do password cũ bị sai nên đổi lại **`Hoangphuc123@`** 
 
@@ -2971,7 +2971,7 @@ Certificate Templates
 
 Giờ thì mình đã check trên `fernando.r` , giờ thì mục tiêu tiếp theo là gì ? 
 
-![image](/assets/img/HTB/season9/Hercules/image%2088.png)
+![image](/assets/img/HTB/season9/Hercules/image88.png)
 
 Nhìn thấy thì nó trỏ về `ashley.b` chứ ko phải vì nó từ path này. 
 
@@ -2981,21 +2981,21 @@ Mình cũng nhận được các mail liên quan đến Ashley.b và user này c
 
 **Step 1: Dùng certipy để request 1 enrollment agent certificate** 
 
-![image](/assets/img/HTB/season9/Hercules/image%2089.png)
+![image](/assets/img/HTB/season9/Hercules/image89.png)
 
 **Step 2: Dùng enrollment agent certificate đó để thay thế các user khác đưa ra yêu cầu certifiacate template chỉ cho phép xác thực và cho phép đăng ký agent enrollment.** 
 
-![image](/assets/img/HTB/season9/Hercules/image%2090.png)
+![image](/assets/img/HTB/season9/Hercules/image90.png)
 
 **Step 3: Request 1 ticket granting ticket (TGT) từ domain, chỉ định danh tính mục tiêu cần mạo danh và chứng chỉ có định PFX được tạo ở bước 2.**
 
-![image](/assets/img/HTB/season9/Hercules/image%2091.png)
+![image](/assets/img/HTB/season9/Hercules/image91.png)
 
 Giờ mục tiêu kế tiếp là `iis_administrator` 
 
 ### Privilege Escalation
 
-![image](/assets/img/HTB/season9/Hercules/image%2092.png)
+![image](/assets/img/HTB/season9/Hercules/image92.png)
 
 Nhìn thấy thì account này ko enable và `Admin Count` được set thành `TRUE` vì vậy mình ko thể re-enable được.
 
@@ -3003,7 +3003,7 @@ Nhìn thấy thì account này ko enable và `Admin Count` được set thành `
 
 Mình sẽ phải check path từ `iis_administrator` tới `administrator` 
 
-![image](/assets/img/HTB/season9/Hercules/image%2093.png)
+![image](/assets/img/HTB/season9/Hercules/image93.png)
 
 Mình có `iis_administrator` là member của group `SERVICE OPERATORS@HERCULES.HTB` mà mình có thể `ForgeChangePassword` tới `iis_webserver$` và user này có thể `AllowedToAct` tới `DC.HERCULES.HTB` 
 
@@ -3015,7 +3015,7 @@ Mình có `iis_administrator` là member của group `SERVICE OPERATORS@HERCULES
 
 Request TGT cho **`ashley.b`** 
 
-![image](/assets/img/HTB/season9/Hercules/image%2094.png)
+![image](/assets/img/HTB/season9/Hercules/image94.png)
 
 Tiếp cận account **`ashley.b`** và session này, đồng thời nó cũng là member của **`REMOTE MANAGEMENT@HSERCULES.HTB`** 
 
@@ -3281,7 +3281,7 @@ Cleanup : CN=Jacob Bentley,OU=Engineering Department,OU=DCHERCULES,DC=hercules,D
 
 Mình có thể thấy ở đây ko có **`iis_administrator`** nhưng mình vẫn chưa enable và reset passsword. 
 
-![image](/assets/img/HTB/season9/Hercules/image%2095.png)
+![image](/assets/img/HTB/season9/Hercules/image95.png)
 
 Trong bloodhound cho mình thấy **`ashley.b`** là thành viên của **`IT SUPPORT@HERCULES.HTB`** mà có quyền để thay đổi password object 
 
@@ -3362,35 +3362,35 @@ Giờ mình nhìn thấy cleanup cho **`IIS_Administrator`**
 
 → kế tiếp mình cần re-enable nó lên. 
 
-![image](/assets/img/HTB/season9/Hercules/image%2096.png)
+![image](/assets/img/HTB/season9/Hercules/image96.png)
 
-![image](/assets/img/HTB/season9/Hercules/image%2097.png)
+![image](/assets/img/HTB/season9/Hercules/image97.png)
 
 Sau khi re-enable và cleanup, mình check lại.
 
-![image](/assets/img/HTB/season9/Hercules/image%2098.png)
+![image](/assets/img/HTB/season9/Hercules/image98.png)
 
-![image](/assets/img/HTB/season9/Hercules/image%2099.png)
+![image](/assets/img/HTB/season9/Hercules/image99.png)
 
 Giờ thì mình reset password nó lại. 
 
-![image](/assets/img/HTB/season9/Hercules/image%20100.png)
+![image](/assets/img/HTB/season9/Hercules/image100.png)
 
 Request cho TGT 
 
-![image](/assets/img/HTB/season9/Hercules/image%20101.png)
+![image](/assets/img/HTB/season9/Hercules/image101.png)
 
 Giờ thì mình tới `iis_webserver$`
 
-![image](/assets/img/HTB/season9/Hercules/image%20102.png)
+![image](/assets/img/HTB/season9/Hercules/image102.png)
 
 Mình `forcechangepassword` tới `iis_webserver$` 
 
-![image](/assets/img/HTB/season9/Hercules/image%20103.png)
+![image](/assets/img/HTB/season9/Hercules/image103.png)
 
 Tiếp tục request TGT 
 
-![image](/assets/img/HTB/season9/Hercules/image%20104.png)
+![image](/assets/img/HTB/season9/Hercules/image104.png)
 
 ### RBCD
 
@@ -3547,4 +3547,4 @@ Impacket v0.13.0.dev0 - Copyright Fortra, LLC and its affiliated companies
 [*] Cleaning up...**
 ```
 
-![image](/assets/img/HTB/season9/Hercules/image%20105.png)
+![image](/assets/img/HTB/season9/Hercules/image105.png)

