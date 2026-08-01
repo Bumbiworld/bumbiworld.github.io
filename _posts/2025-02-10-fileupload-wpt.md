@@ -1,0 +1,180 @@
+---
+title: File Upload - WPT
+date: 2025-02-10
+tags: [file upload]
+categories: [Writeups, wpt]
+author: bumbi.203_
+---
+
+## 🧪 Level 1
+
+---
+
+![image.png](/assets/img/WPT/file-upload/image.png)
+
+Đầu tiên ta thực hiện upload 1 file **`.txt`** xem nó xử lý như thế nào? 
+
+![image.png](/assets/img/WPT/file-upload/image1.png)
+
+Mình truy cập vào nơi nó lưu file đã upload. 
+
+![image.png](/assets/img/WPT/file-upload/image2.png)
+
+Như vậy nó thực hiện in ra nội dung file mình đã upload. 
+
+Để biết nó xử lý như thế nào thì mình nên đọc source của level 1 này. 
+
+![image.png](/assets/img/WPT/file-upload/image3.png)
+
+Nhìn vào thì thấy các vấn đề quan trọng.
+
+- nơi lưu tại **`/upload/<session_id>/`**
+- Không chặn các file thực thi như **`.php`**
+
+Như vậy ta thực hiện upload 1 file **`.php`** với nội dung in ra **`phpinfo();`** 
+
+![image.png](/assets/img/WPT/file-upload/image4.png)
+
+Minh thực hiện truy cập. 
+
+![image.png](/assets/img/WPT/file-upload/image5.png)
+
+Đến đây thì mình thực hiện upload 1 file shell. 
+
+![image.png](/assets/img/WPT/file-upload/image6.png)
+
+Sau khi truy cập vào file shell.
+
+![image.png](/assets/img/WPT/file-upload/image7.png)
+
+## 🧪 Level 2
+
+---
+
+![image.png](/assets/img/WPT/file-upload/image8.png)
+
+Tương tự như mình cũng đọc source của level 2 này. 
+
+![image.png](/assets/img/WPT/file-upload/image9.png)
+
+Level 2 này đã chặn mình upload file **`.php`** bằng cách kiểm tra
+
+```php
+**$extension = explode(".", $filename)[1];
+if ($extension === "php") {
+   die("Hack detected");
+}**
+```
+
+Nó dùng hàm **`explode`** để phân tích dấu **`.`** sau đó lấy index **`[1]`** là đuôi file. Nhưng thực tế thì đâu có chỉ đuôi file **`.php`** mới được xử lí code **`php`**. 
+
+Quan sát config trên apache server. 
+
+![image.png](/assets/img/WPT/file-upload/image10.png)
+
+Như vậy ngoài file **`.php`** thì còn có **`.phar`** , **`.phtml`** cũng có khả năng thực hiện code **`php`**
+
+Mình thực hiện upload file **`.phar`** lên server với nội dung là tương tự như level 1.
+
+![image.png](/assets/img/WPT/file-upload/image11.png)
+
+Sau đó mình thực hiện truy cập vào.
+
+![image.png](/assets/img/WPT/file-upload/image12.png)
+
+## 🧪 Level 3
+
+---
+
+![image.png](/assets/img/WPT/file-upload/image13.png)
+
+Đến level 3 cách ngăn chặn đã thay đổi.
+
+```php
+**$extension = end(explode(".", $filename));
+if ($extension === "php") {
+    die("Hack detected");
+}**
+```
+
+Cách kiểm chuyển sang dùng thêm hàm **`end()`** thì nó cho phép lấy cuối cùng, lấy cuối cùng mà tận cùng là **`php`** thì nó sẽ chặn. 
+
+Nhưng vẫn có cách bypass → bằng cách mình chỉ cần đổi đuôi file cuối cùng không phải **`php`** là được.
+
+![image.png](/assets/img/WPT/file-upload/image14.png)
+
+Sau đó mình truy cập vào shell đã cắm.
+
+![image.png](/assets/img/WPT/file-upload/image15.png)
+
+## 🧪 Level 4
+
+---
+
+![image.png](/assets/img/WPT/file-upload/image16.png)
+
+Với level này thì nó đã chặn các đuôi file là **`.php`** , **`.phtml`**  và **`.phar`** và nó đã thực hiện blacklist.
+
+Nhưng việc thực hiện blacklist rất dễ bỏ xót các file. Và đặc biệt là file **`.htaccess`** 
+
+Nhưng để đảm bảo thì mình tìm đọc config của server có cho phép file **`.htaccess`** thực hiện hay không.
+
+![image.png](/assets/img/WPT/file-upload/image17.png)
+
+Nhìn thấy thì server cho phép → mình thực hiện upload file **`.htaccess`** để server thực hiện cho phép đuôi file khác thực hiện code backend.
+
+![image.png](/assets/img/WPT/file-upload/image18.png)
+
+Sau đó mình up shell với đuôi file **`.txt`** 
+
+![image.png](/assets/img/WPT/file-upload/image19.png)
+
+Giờ thì mình tiến hành truy cập. 
+
+![image.png](/assets/img/WPT/file-upload/image20.png)
+
+## 🧪 Level 5
+
+---
+
+![image.png](/assets/img/WPT/file-upload/image21.png)
+
+Đối với level 5 này thì cho phép mình upload file hình ảnh. Nhưng nếu khác các **`mime_type`** trong mảng cho phép thì nó sẽ bị detect.
+
+Như vậy nó chỉ kiểm tra `Content-Type` có nằm trong danh sách cho phép hay không.
+
+Như vậy nếu mình upload 1 file giả dạng phần **`Content-Type`** nhưng code **`php`** thì sao. 
+
+![image.png](/assets/img/WPT/file-upload/image22.png)
+
+Sau đó mình truy cập vào file này.
+
+![image.png](/assets/img/WPT/file-upload/image23.png)
+
+## 🧪 Level 6
+
+---
+
+![image.png](/assets/img/WPT/file-upload/image24.png)
+
+Đối với level 6 này thì cho phép mình upload file hình ảnh. Nhưng nếu khác các **`mime_type`** trong mảng cho phép thì nó sẽ bị detect và nội dung bên trong file.
+
+Đối với các file hình ảnh này để server có thể nhận biết thì dựa vào các magic bytes → đối với **`JPEG`** , **`PNG`** và **`GIF`** luôn có các magic bytes riêng biệt.
+
+Như vậy nếu mình upload 1 file có magic bytes giả dạng nhưng code **`php`** thì sao. 
+
+![image.png](/assets/img/WPT/file-upload/image25.png)
+
+Sau đó mình truy cập vào khi mình mới upload.
+
+![image.png](/assets/img/WPT/file-upload/image26.png)
+
+### ✨ Cách phòng chống file upload
+
+Upload file an toàn cần:
+
+- Dùng **whitelist extension**
+- Chặn **path traversal trong filename**
+- **Đổi tên file** khi lưu
+- **Validate xong mới lưu thật**
+- **Dùng framework chuẩn**, tránh code tay
