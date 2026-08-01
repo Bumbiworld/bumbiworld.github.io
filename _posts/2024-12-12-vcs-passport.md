@@ -2,7 +2,7 @@
 title: VCS PassPort 2024 - WEB
 date: 2024-12-12
 tags: [ctf, web]
-categories: [CTF, Writeups]
+categories: [Writeups, CTF]
 author: bumbi.203_
 ---
 

