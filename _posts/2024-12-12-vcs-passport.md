@@ -19,7 +19,7 @@ Sau khi đọc qua source code, thì nhận thấy web bị `SQLi` và tóm tắ
 
 `get_meme("/meme")`
 
-```
+```sql
 SELECT filename FROM memes WHERE id="{id}"
 ```
 
@@ -27,7 +27,7 @@ Giá trị id do người dùng truyền vào bị convert --> UUID trước khi
 
 `login ("/login")`
 
-```
+```sql
 SELECT * FROM users WHERE username=("{username}")
 ```
 
@@ -50,7 +50,7 @@ INSERT INTO memes (id, title, filename) VALUES ("{id}", "{title}", "{filename}")
 
 ### 🔍 Flag 1 
 
-```python=
+```python
 @app.route("/freeflag")
 def index():
     segcret = request.args.get("segcret", None)
@@ -77,7 +77,7 @@ Còn nếu mình cung cấp dúng `segcret` đúng với `SECRET_KEY` thì nó s
 
 Mục tiêu của FLAG2 là đăng nhập bằng `amdin`. 
 
-```
+```python
 @app.route("/login")
 def login():
     username = request.args.get("username", None)
@@ -107,6 +107,7 @@ def admin():
 
     return f"Welcome admin! Here is your flag: {FLAG2}"
 ```
+
 Ở endpoint `login` sẽ lấy username dựa vào `get_user` trong db. Sau đó, password sẽ được hash rồi so sánh với hash trong db nếu đúng thì được login vào. 
 
 Do challenge đã bỏ qua điều kiện `len(username) < 25`, nên sẽ khai thác theo cách cập nhật lại hash password của tài khoản admin. 
@@ -133,11 +134,14 @@ Mục tiêu là đọc `/proc/self/environ` hoặc `/proc/x/environ` qua endpoin
 Vì trường `title` không có kiểm soát nên mình có thể inject để nối payload path traversal vào trường `filename`. Như vậy, cần inject để thực hiện vào path traversal để có thể đọc file.
 
 Câu query ban đầu:
-```
+
+```sql
 INSERT INTO memes (id, title, filename) VALUES ("{id}", "{title}", "{filename}")
 ```
+
 Câu query lúc sau: 
-```
+
+```sql
 INSERT INTO memes (id, title, filename) VALUES ("z", "x", "../../../../../proc/self/environ")--+a, "")
 ```
 Mình cần upload nhưng mà ko UI nên phải gửi qua `curl`.
@@ -149,7 +153,8 @@ Sau đó, mình truy cập vào id do ảnh mình đã upload thành công.
 ![image](/assets/img/CTF/vcs-2024/image10.png)
 
 Nhưng vì sao chỉ có FLAG3, vì trong docker có file như sau: 
-```
+
+```bash
 #!/bin/sh
 
 echo "$FLAG1" > /flag1.txt
